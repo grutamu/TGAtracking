@@ -156,12 +156,10 @@ AdminRouter.post('/district/new', function(req, res) {
         district_state: req.body.state,
         district_zip: req.body.zip,
         is_active: isactive,
-    }, function(err, district) {
+    }, function(err) {
         if (err) {
             //return res.render('users_new', { account : account });
         }
-
-        console.log(district);
 
         res.redirect('/admin/district');
     });
@@ -326,13 +324,25 @@ AdminRouter.get('/school/edit', function(req, res) {
     }
 
     var schoolData;
+    var districtData;
 
-    School.schools.find(req.query, function (err, response) {
-        if (err) return handleError(err);
-        schoolData = response[0]; 
-        console.log(schoolData);
-        res.render('school_edit', { user : req.user, data : schoolData});
+    School.districts
+    .find({})
+    .exec(function (err, response) {
+
+        districtData = response;
+
+        School.schools
+        .findOne(req.query)
+        .exec(function (err, response) {
+            if (err) return handleError(err);
+            schoolData = response; 
+            console.log(schoolData);
+            res.render('school_edit', { user : req.user, data : schoolData, districts: districtData});
+        })
+
     })
+        
 });
 
 AdminRouter.post('/school/edit', function(req, res) {

@@ -1,9 +1,10 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var school = {};
+var database = {};
 
 var autoIncrement = require('mongoose-auto-increment');
 var connection = mongoose.createConnection('mongodb://localhost/TGAtracking');
+var timestamps = require('mongoose-timestamp');
 
 autoIncrement.initialize(connection);
 
@@ -14,48 +15,37 @@ var caseloadmgr_students = new Schema({
    	student_id: Number
 });
 
-school.caseloadmgr_students = mongoose.model('caseloadmgr_students', caseloadmgr_students);
+database.caseloadmgr_students = mongoose.model('caseloadmgr_students', caseloadmgr_students);
 
 var courses = new Schema({
-    course_id: Number,
-    course_name: Number,
-    course_abbrev: Number,
-    district_id: Number,
-    school_id: Number,
-    school_year: Number,
-    school_period: Number,
+    course_name: String,
+    course_number: Number,
+    school: {type: Schema.Types.ObjectId, ref: 'schools'},
+    school_year: String,
     course_begin_date: Date,
     course_end_date: Date,
-    marking_period: Number,
-    teacher_id: Number,
+    teacher: {type: Schema.Types.ObjectId, ref: 'Account'},
+    students: [{type: Schema.Types.ObjectId, ref: 'Account'}],
     completed_date: Date,
-    course_is_active: Number,
-    last_updated: { type: Date, default: Date.now },
-    semester1: Number,
-    semester2: Number,
-    semester3: Number,
-    quarterNum_mp1: Number,
-    quarterNum_mp2: Number,
-    quarterNum_mp3: Number,
-    quarterNum_mp4: Number,
-    quarterNum_mp5: Number
+    course_is_active: Boolean,
 });
 
-
-school.courses = mongoose.model('courses', courses);
+courses.plugin(timestamps);
+courses.plugin(autoIncrement.plugin, {model: 'courses', field: 'course_id'});
+database.courses = mongoose.model('courses', courses);
 
 
 var course_attendance = new Schema({
-    id: Number,
-    course_id: Number,
-   	user_id: Number,
+    course: {type: Schema.Types.ObjectId, ref: 'courses'},
+   	user: {type: Schema.Types.ObjectId, ref: 'Account'},
    	attendance_date: Date,
    	attendance_type: String,
-   	tardy_time: String,
-   	last_updated:{ type: Date, default: Date.now }
+   	tardy_time: String
 });
 
-school.course_attendance = mongoose.model('course_attendance', course_attendance);
+course_attendance.plugin(timestamps);
+courses.plugin(autoIncrement.plugin, {model: 'course_attendance', field: 'id'});
+database.course_attendance = mongoose.model('course_attendance', course_attendance);
 
 
 var course_gradebook = new Schema({
@@ -69,7 +59,7 @@ var course_gradebook = new Schema({
    	date_updated:{ type: Date, default: Date.now }
 });
 
-school.course_gradebook = mongoose.model('course_gradebook', course_gradebook);
+database.course_gradebook = mongoose.model('course_gradebook', course_gradebook);
 
 
 var course_gradebook_finals = new Schema({
@@ -95,7 +85,7 @@ var course_gradebook_finals = new Schema({
 	date_updated: String
 });
 
-school.course_gradebook_finals = mongoose.model('course_gradebook_finals', course_gradebook_finals);
+database.course_gradebook_finals = mongoose.model('course_gradebook_finals', course_gradebook_finals);
 
 
 var course_grade_weights = new Schema({
@@ -106,7 +96,7 @@ var course_grade_weights = new Schema({
   percent: Number
 });
 
-school.course_grade_weights = mongoose.model('course_grade_weights', course_grade_weights);
+database.course_grade_weights = mongoose.model('course_grade_weights', course_grade_weights);
 
 
 var course_grading_scale = new Schema({
@@ -118,7 +108,7 @@ var course_grading_scale = new Schema({
   end_perc: Number
 });
 
-school.course_grading_scale = mongoose.model('course_grading_scale', course_grading_scale);
+database.course_grading_scale = mongoose.model('course_grading_scale', course_grading_scale);
 
 
 var course_structure = new Schema({
@@ -131,7 +121,7 @@ var course_structure = new Schema({
   hide: { type: Number, default: 0 }
 });
 
-school.course_structure = mongoose.model('course_structure', course_structure);
+database.course_structure = mongoose.model('course_structure', course_structure);
 
 
 var course_students = new Schema({
@@ -143,7 +133,7 @@ var course_students = new Schema({
   student_completed_course: Number
 });
 
-school.course_students = mongoose.model('course_students', course_students);
+database.course_students = mongoose.model('course_students', course_students);
 
 
 var districts = new Schema({
@@ -157,7 +147,7 @@ var districts = new Schema({
 });
 
 districts.plugin(autoIncrement.plugin, {model: 'districts', field: 'district_id'});
-school.districts = mongoose.model('districts', districts);
+database.districts = mongoose.model('districts', districts);
 
 
 var progress_report_data = new Schema({
@@ -200,7 +190,7 @@ var progress_report_data = new Schema({
   last_updated: { type: Date, default: Date.now }
 });
 
-school.progress_report_data = mongoose.model('progress_report_data', progress_report_data);
+database.progress_report_data = mongoose.model('progress_report_data', progress_report_data);
 
 
 var progress_report_data_courses = new Schema({
@@ -216,7 +206,7 @@ var progress_report_data_courses = new Schema({
   last_updated: { type: Date, default: Date.now }
 });
 
-school.progress_report_data_courses = mongoose.model('progress_report_data_courses', progress_report_data_courses);
+database.progress_report_data_courses = mongoose.model('progress_report_data_courses', progress_report_data_courses);
 
 
 var report_card_data = new Schema({
@@ -243,7 +233,7 @@ var report_card_data = new Schema({
   last_updated: { type: Date, default: Date.now }
 });
 
-school.report_card_data = mongoose.model('report_card_data', report_card_data);
+database.report_card_data = mongoose.model('report_card_data', report_card_data);
 
 
 var report_card_data_courses = new Schema({
@@ -255,7 +245,7 @@ var report_card_data_courses = new Schema({
   grade_perc: String
 });
 
-school.report_card_data_courses = mongoose.model('report_card_data_courses', report_card_data_courses);
+database.report_card_data_courses = mongoose.model('report_card_data_courses', report_card_data_courses);
 
 
 var roles = new Schema({
@@ -264,8 +254,7 @@ var roles = new Schema({
   role_order: Number
 });
 
-school.roles = mongoose.model('roles', roles);
-
+database.roles = mongoose.model('roles', roles);
 
 var schools = new Schema({
   district: {type: Schema.Types.ObjectId, ref: 'districts'},
@@ -279,9 +268,9 @@ var schools = new Schema({
   last_updated: { type: Date, default: Date.now }
 });
 schools.plugin(autoIncrement.plugin, {model: 'schools', field: 'school_id'});
-school.schools = mongoose.model('schools', schools);
+database.schools = mongoose.model('schools', schools);
 
 
-module.exports = school;
+module.exports = database;
 
 

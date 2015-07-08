@@ -21,6 +21,7 @@
     "should": "~2.1.0",
     "serve-favicon": "^2.2.0",
     "debug": "^2.1.1",
-    "mongoose-auto-increment": "^4.0.0"
+    "mongoose-auto-increment": "^4.0.0",
+    "mongoose-timestamp": "^0.4.0"
   }
 }
