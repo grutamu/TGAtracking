@@ -268,7 +268,7 @@ school.roles = mongoose.model('roles', roles);
 
 
 var schools = new Schema({
-  district_id: Number,
+  district: {type: Schema.Types.ObjectId, ref: 'districts'},
   school_name: String,
   school_address: String,
   school_city: String,
@@ -280,10 +280,6 @@ var schools = new Schema({
 });
 schools.plugin(autoIncrement.plugin, {model: 'schools', field: 'school_id'});
 school.schools = mongoose.model('schools', schools);
-
-
-
-
 
 
 module.exports = school;

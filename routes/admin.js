@@ -10,10 +10,9 @@ AdminRouter.get('/', function(req, res) {
 	if(!req.user){
         res.redirect('/');
     }
+
     res.render('admin', { user : req.user });
 });
-
-
 
 
 AdminRouter.get('/users', function(req, res) {
@@ -220,7 +219,10 @@ AdminRouter.get('/school', function(req, res){
 
     var SchoolResponse;
 
-    School.schools.find({}, function (err, response) {
+    School.schools
+    .find({}) 
+    .populate("district")
+    .exec(function (err, response) {
         if (err) return handleError(err);
         
         SchoolResponse = response;
@@ -283,25 +285,39 @@ AdminRouter.post('/school/new', function(req, res) {
     if(req.body.active == "inactive")
         isactive = false
 
-    School.schools.create({
-        district_id: req.body.districtid,
-        school_name: req.body.name,
-        school_address: req.body.address,
-        school_city: req.body.city,
-        school_state: req.body.state,
-        school_zip: req.body.zip,
-        current_school_year: req.body.schoolyear,
-        school_is_active: isactive
-    }, function(err, school) {
-        if (err) {
-            console.log("Error: " + err )
-            //return res.render('users_new', { account : account });
-        }
+    School.districts
+    .findOne({district_id: req.body.districtid})
+    .exec(function(err, District){
+        console.log(District);
+        
 
-        console.log(school);
+        var NewSchool = new School.schools({
+            district: District._id,
+            school_name: req.body.name,
+            school_address: req.body.address,
+            school_city: req.body.city,
+            school_state: req.body.state,
+            school_zip: req.body.zip,
+            current_school_year: req.body.schoolyear,
+            school_is_active: isactive
+        });
 
-        res.redirect('/admin/school');
-    });
+
+        NewSchool
+        .save(function(err){
+            if (err) {
+                console.log("Error: " + err )
+            }
+
+            
+
+            res.redirect('/admin/school');
+        });
+
+        
+
+    })
+        
 });
 
 AdminRouter.get('/school/edit', function(req, res) {
