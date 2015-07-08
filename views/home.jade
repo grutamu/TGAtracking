@@ -1,0 +1,8 @@
+extends sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("homesidebar").className = "active";
+		}
+	p home page!
+	a(href="/admin/users/edit?username=#{user.username}") Edit #{user.username}

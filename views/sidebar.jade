@@ -1,0 +1,48 @@
+extends sysheader
+block sidebar
+	ul.sys_nav
+		li.inactive(id='homesidebar')
+			a(href="/home") Dashboard
+	for types in user.usertype
+		if(types == "admin")
+			ul.sys_nav
+				li.inactive(id='adminsidebar')
+					span Site Settings
+					ul
+						li.inactive
+							a(href="/admin") Admin Page
+						li.inactive
+							a(href="/admin/users") Manage Users
+						li.inactive
+							a(href="/admin/district") Manage Districts
+						li.inactive
+							a(href="/admin/school") Manage Schools
+		if(types == "teacher")
+			ul.sys_nav
+				li.inactive(id='teachersidebar')
+					span Teacher
+					ul
+						li.inactive
+							a(href="/home") Teacher Page
+		if(types == "districtadmin")
+			ul.sys_nav
+				li.inactive(id='districtadminsidebar')
+					span District Administrator
+					ul
+						li.inactive
+							a(href="/home") District Admin Page				
+		if(types == "caseloadmanager")
+			ul.sys_nav
+				li.inactive(id='caseloadmanagersidebar')
+					span Caseload Manager
+					ul
+						li.inactive
+							a(href="/home") Caseload Manager Page
+		if(types == "student")
+			ul.sys_nav
+				li.inactive(id='studentsidebar')
+					span Student
+					ul
+						li.inactive
+							a(href="/home") Student Page
+

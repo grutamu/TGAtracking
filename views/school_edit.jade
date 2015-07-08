@@ -1,0 +1,31 @@
+extends sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("adminsidebar").className = "active";
+		}
+	form(role='form', action="/admin/school/edit",method="post", style='max-width: 300px;', id="form_id")
+		.form-group
+			input.form-control(type='text', name="schooid", value='#{data.school_id}', readonly)
+		.form-group
+			input.form-control(type='text', name="districtid", value='#{data.district_id}')
+		.form-group
+			input.form-control(type='text', name="name", value='#{data.school_name}')
+		.form-group
+			input.form-control(type='txt', name="address", value='#{data.school_address}')
+		.form-group
+			input.form-control(type='text', name="city", value='#{data.school_city}')
+		.form-group
+			input.form-control(type='text', name="state", value='#{data.school_state}')
+		.form-group
+			input.form-control(type='text', name="zip", value='#{data.school_zip}')
+		.form-group
+			input.form-control(type='text', name="schoolyear", value='#{data.current_school_year}')
+		.form-group
+			label Is Active:
+			select(form="form_id",name="active")
+				option(value = "active") Active
+				option(value = "inactive") Inactive
+		button.btn.btn-default(type='submit') Submit
+		a(href='/admin/school')
+			button.btn.btn-primary(type="button") Cancel

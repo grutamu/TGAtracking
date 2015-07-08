@@ -1,0 +1,28 @@
+extends sidebar
+
+block sysmain
+
+	form(role='form', action="/admin/users/new",method="post")
+		.form-group
+			input.form-control(type='text', name="username", placeholder='Enter Username')
+			br
+			br
+		.form-group
+			input.form-control(type='password', name="password", placeholder='Password')
+			br
+			br
+			input.form-control(type='text', name="firstname", placeholder='First Name')
+			br
+			br
+			input.form-control(type='text', name="lastname", placeholder='Last Name')
+			br
+			br
+			input.form-control(type='text', name="email", placeholder='Email')
+			br
+			br
+			input.form-control(type='text', name="usertype", placeholder='User Type')
+			br
+			br
+			button.btn.btn-default(type='submit') Submit
+			a(href='/admin/users')
+				button.btn.btn-primary(type="button") Cancel

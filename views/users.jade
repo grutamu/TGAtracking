@@ -1,0 +1,17 @@
+extends sidebar
+
+block sysmain
+
+	p Users Page
+
+
+	p User Listing
+	each users, i in userQuery
+		a(href="/admin/users/edit?username=#{users.username}") Edit #{users.username}
+		br
+
+	br
+	br
+	a(href='/admin/users/new')
+		button.btn.btn-primary(type="button") New User
+

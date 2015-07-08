@@ -1,0 +1,34 @@
+doctype html
+html
+	head
+		title Administration
+		link(rel='stylesheet', href='/stylesheets/sys_style.css')
+
+		link(rel='stylesheet', href='/stylesheets/flaticon.css')
+	body 
+		.sys_admin
+			#container
+				#header
+					#header_right 
+						a(href="/logout") Logout
+					
+					#header_left
+						img(src="/images_user/school_seal.png" align="left")
+
+						//TODO: Make this reflect users role!
+						h1 Administration
+						|Welcome #{user.firstname} #{user.lastname}
+						br
+						//TODO: Add "Role for the School" title
+						if(user.usertype == "admin")
+							|Administrator
+						if(user.usertype == "teacher")
+							|Teacher
+						if(user.usertype == "caseloadmanager")
+							|Caseload Manager
+						if(user.usertype == "student")
+							|Student
+				#sys_left
+					block sidebar
+				#sys_mainContent
+					block sysmain

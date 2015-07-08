@@ -1,0 +1,50 @@
+extends sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("adminsidebar").className = "active";
+		}
+	p District Page
+	a(href='/admin/district/new')
+		button.btn.btn-primary(type="button") New District
+	p District Listing
+	form(role='form', action="/admin/district", method="post", name="form_id")
+		table
+			thead
+			tbody
+				tr
+					th
+						|Select
+					th
+						|Name
+					th
+						|Address
+					th
+						|City
+					th
+						|State
+					th
+						|Zip
+				for district in districts		
+					tr
+						th
+							input.form-control(type='checkbox', name="#{district.district_id}")
+						td
+							a(href="/admin/district/edit?district_id=#{district.district_id}")  #{district.district_name} 
+						td
+							|#{district.district_address} 
+						td
+							|#{district.district_city} 
+						td
+							|#{district.district_state}
+						td
+							|#{district.district_zip}
+		select(name="SubmitButtonSelector")
+			option(value = "none") -- --
+			option(value = "delete") Delete
+			option(value = "edit") Edit
+		button.btn.btn-default(type='submit') Submit						
+
+					
+		
+

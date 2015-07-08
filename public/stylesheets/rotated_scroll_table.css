@@ -1,0 +1,109 @@
+table.rotated_scroll_table {
+  table-layout: fixed; 
+  width: 100%;
+  *margin-left: -100px;/*ie7*/
+}
+
+
+.rotated_scroll_table_outer {position:relative}
+.rotated_scroll_table_inner {
+  overflow-x:scroll;
+  overflow-y:visible;
+  margin-left:250px;
+ /* width: 510px; width of table content cells - place style width in div*/
+  
+}
+table.rotated_scroll_table tr th {
+	 position:absolute;
+ 	*position: relative; /*ie7*/
+  	left:0;
+	text-align: left;
+	width: 250px;		
+}
+.expanded {
+	height: 300px!important;
+}
+table.rotated_scroll_table tr {
+	float: left;	
+}
+.rotated_scroll_table tr td {
+	padding:4px;	
+}
+table.rotated_scroll_table tr td input {
+	width: 25px;	
+}
+
+
+/*rotated text*/
+.rotated_scroll_table tr:first-child  td{  /*rotated headers with text*/
+    /*border:1px solid;*/
+	font-size: .90em;
+	padding: 3px; /*adjust to fit column width*/	
+}
+
+table.rotated_scroll_table .rotated_cell /*rotated header cells */
+{
+ height:300px;
+ vertical-align:bottom;
+}
+
+table.rotated_scroll_table .rotate_text
+{ /* div of rotated text */
+ writing-mode: tb-rl; /*IE*/
+ filter: flipH() flipV(); /* IE */
+
+ -moz-transform:rotate(-90deg); 
+ -moz-transform-origin: top left;
+ -webkit-transform: rotate(-90deg);
+ -webkit-transform-origin: top left;
+ -o-transform: rotate(-90deg);
+ -o-transform-origin:  top left;
+  position:relative;
+  
+ top:20px;
+
+ text-align: left; /*aligns to bottom*/
+  padding-top: 10px;/*centers text horizontally*/
+
+white-space:nowrap;
+
+width:35px;
+
+
+}
+
+
+/*zebra*/
+/*rows*/
+.rotated_scroll_table tr:nth-child(even) { /*input cell rows*/
+    background: #f1f1f1;
+}
+
+table.rotated_scroll_table .th_odd {
+	background: #f1f1f1; /*odd rows - th names*/
+	
+	
+}
+table.rotated_scroll_table .th_even {
+	background: #ffffff; /*even rows - th names*/
+}
+
+table.rotated_scroll_table .th_odd, table.rotated_scroll_table .th_even {
+	height: 20px;
+	padding: 8px 0;	
+}
+
+table.rotated_scroll_table .horz_text { /*Name text*/
+	margin-left: 5px;
+	font-size: .90em;
+}
+
+/*columns*/
+.rotated_scroll_table tr td:nth-child(even) { /*input cell columns*/
+    background: #e7e7e7;
+}
+
+.custom_cell_width {
+	padding: 0 13px!important;
+
+}

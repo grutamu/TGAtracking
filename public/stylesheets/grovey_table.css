@@ -1,0 +1,109 @@
+
+
+/*.grovey_table tr:last-child td {border-bottom: none !important;}*/
+.grovey_table tr:first-child td {border-top: none !important;}
+/*.grovey_table td:last-child {border-right: none !important;}
+.grovey_table tr:first-child td {border-left: 1px solid #e0e0e0;}
+*/
+.grovey_table table {
+    margin: auto;
+    margin-top: 50px;
+    width: 50%;
+    text-align: center;
+    border: 1px solid #e0e0e0 !important;
+    background-color: #fafafa;
+    -webkit-box-shadow: 0 1px 3px 1px rgba(0,0,0,.05);	
+    box-shadow: 0 1px 3px 1px rgba(0,0,0,.05);
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+	font-size: 95%;
+}
+.grovey_table th {
+    background: -webkit-linear-gradient(top, #e9eaec 0%,#d4d4d6 100%);
+    background: linear-gradient(top, #e9eaec 0%,#d4d4d6 100%);
+    font-size: 95%;
+    /*line-height: 27px;*/
+    padding: 5px;
+    border-bottom: 2px solid rgba(0,0,0,.15);
+    border-top: 1px solid rgba(255,255,255,.9);
+    /*border-top-left-radius:5px;
+    border-top-right-radius:5px;
+	*/
+    text-shadow: 0 1px 1px #fff;
+}
+.grovey_table td {
+    border-top: 1px solid #fefefe;
+    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+	border-left: 1px solid #e0e0e0;
+    padding:  0 5px;	
+	
+}
+/******** Alternate ROW color *****/
+.grovey_table tr:nth-child(even) {
+    background: #f1f1f1;
+}
+
+
+
+.grovey_table button {
+	width: 20px;
+	height: 20px;
+}
+button.groveyTbl_addRow   {
+	width: 80px !important;	
+}
+/*.grovey_table tr td:nth-child(even) {
+    background: #ddd;
+    border-top: none;
+    border-bottom: 1px solid rgba(0,0,0,.1);
+}*/
+
+/*
+a.up {
+display: block;
+float: left;
+margin: 10px 20px 10px 10px;
+width: 26px;
+height: 26px;
+background: url(images/up.png) 0 0 no-repeat;
+vertical-align: middle;
+}
+
+a.down {
+display: block;
+float: left;
+margin: 10px 20px 10px 10px;
+width: 26px;
+height: 26px;
+background: url(images/down.png) 0 0 no-repeat;
+}
+
+a.delrow {
+display: block;
+float: left;
+margin: 10px 20px 10px 10px;
+width: 26px;
+height: 26px;
+background: url(images/delete.png) 0 0 no-repeat;
+}
+#BtnCnt{ width: 100px; margin: 0 auto; padding: 10px;margin-top: 30px;}
+.button{
+padding: 10px 15px;
+background: #4479BA;
+color: #FFF;
+webkit-border-radius: 4px;
+-moz-border-radius: 4px;
+border-radius: 4px;
+border: solid 1px #20538D;
+text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);
+box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.2);}
+
+.button:hover{
+    background: #356094;
+    border: solid 1px #2A4E77;
+    text-decoration: none;
+}
+*/
