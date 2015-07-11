@@ -1,0 +1,49 @@
+extends sidebar
+block sysmain
+	//ToDo fix CSS 
+	form(role='form', action="/distadmin/course/edit",method="post", style='max-width: 300px;', id="form_id")
+		.row
+			label System ID
+			input(type='text', name="course_id", value='#{courses.course_id}', readonly)
+		.row
+			label Course Name
+			input(type='text', name="course_name", value='#{courses.course_name}')
+		.row
+			label Course Number
+			input(type='text', name="course_number", value='#{courses.course_number}')
+		.row
+			label School
+			select(form="form_id", name="school", required)
+				for school in schools
+					if school.school_id == courses.school.school_id
+						option(value = '#{school._id}', selected) #{school.school_name}
+					else 
+						option(value = '#{school._id}') #{school.school_name}
+		.row
+			label School Year:
+			//ToDo: Make sure the School's currect year is highlighted
+			select(form="form_id", name="schoolyear")
+				option(value = "2014 - 2015") 2014 - 2015
+				option(value = "2015 - 2016") 2015 - 2016
+		.row
+			label Teacher
+			select(form="form_id", name="teacher", required)
+				for teacher in teachers
+					if teacher.userid == courses.teacher.userid
+						option(value = '#{teacher._id}', selected) #{teacher.firstname} #{teacher.lastname}
+					if teacher.userid != courses.teacher.userid
+						option(value = '#{teacher._id}') #{teacher.firstname} #{teacher.lastname}		
+		.row
+			label Students
+			select(form="form_id", name="students", multiple, required)
+				for student in students
+					option(value = '#{student._id}', id = '#{student._id}') #{student.firstname} #{student.lastname}
+		.row
+			label Is Active:
+			select(form="form_id",name="active")
+				option(value = "active") Active
+				option(value = "inactive") Inactive
+		.submitrow
+			button(type='submit') Submit
+			a(href='/admin/school')
+				button(type="button") Cancel

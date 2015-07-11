@@ -14,7 +14,10 @@ block sysmain
 			//ToDo: Make sure the School's currect district is highlighted
 			select(form="form_id", name="districtid")
 				for district in districts
-					option(value = '#{district.district_id}') #{district.district_name}
+					if district.district_id == data.district.district_id
+						option(value = '#{district._id}', selected) #{district.district_name}
+					if district.district_id != data.district.district_id
+						option(value = '#{district._id}') #{district.district_name}
 		.row
 			label School Name
 			input.form-control(type='text', name="name", value='#{data.school_name}')

@@ -23,7 +23,7 @@ DistAdminRouter.get('/course', function(req, res) {
     .populate("teacher")
     .populate("students")
     .exec( function(err, courses) {
-    	console.log(courses);
+    	
     	res.render('course', { user : req.user, courses : courses });
 
     });
@@ -53,7 +53,7 @@ DistAdminRouter.get('/course/new', function(req, res) {
 	    	db.schools
 	    	.find({})
 	    	.exec( function(err, Schools){
-	    		console.log(Schools);
+	    		
 	    		SchoolData = Schools;
 	    		res.render('course_new', { user : req.user, teachers : TeacherData, students : StudentData, schools : SchoolData });
 	    	});
@@ -66,14 +66,82 @@ DistAdminRouter.post('/course/new', function(req, res) {
         res.redirect('/');
     }
     db.courses.create(req.body)
-    console.log(req.body);
 
 
     res.redirect('/distadmin/course');
 });
 
 
+DistAdminRouter.get('/course/edit', function(req, res) {
+    if(!req.user){
+        res.redirect('/');
+    }
 
+    var schoolData;
+    var courseData;
+
+    db.courses
+    .findOne(req.query)
+    .populate("school")
+    .populate("teacher")
+    .populate("students")
+    .exec(function(err, Courses){
+
+        courseData = Courses;
+
+        Account
+        .find({})
+        .where('usertype').equals('teacher')
+        .exec(function(err, Teachers){
+
+            TeacherData = Teachers;
+
+            Account
+            .find({})
+            .where('usertype').equals('student')
+            .exec(function(err, Students){
+
+                StudentData = Students;
+
+                db.schools
+                .find({})
+                .exec( function(err, Schools){
+                    SchoolData = Schools;
+                    res.render('course_edit', { 
+                        user : req.user, 
+                        students: StudentData, 
+                        teachers: TeacherData,
+                        schools : SchoolData, 
+                        courses: courseData
+                    });
+                });
+            });
+        }); 
+    });      
+});
+
+DistAdminRouter.post('/course/edit', function(req, res) {
+    if(!req.user){
+        res.redirect('/');
+    }
+
+    var updateInfo = {
+        course_name: req.body.course_name,
+        course_number: req.body.course_number,
+        school: req.body.school,
+        school_year: req.body.school_year,
+        teacher: req.body.teacher,
+        students: req.body.students
+    }
+
+
+
+    db.courses
+    .findOneAndUpdate({course_id: req.body.course_id}, updateInfo)
+    .exec(function(err){
+        res.redirect('/distadmin/course');
+    });
+});
 
 
 

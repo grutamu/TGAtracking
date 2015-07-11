@@ -59,7 +59,9 @@ AdminRouter.post('/users/edit', function(req, res) {
 
     console.log(req.body);
 
-	Account.findOneAndUpdate({username : req.body.username}, updateInfo,function(err, numberAffected, raw){
+	Account
+    .findOneAndUpdate({username : req.body.username}, updateInfo)
+    .exec(function(err, numberAffected, raw){
         console.log("Updated :" + numberAffected, raw);
 		res.redirect('/admin/users');
 	});
@@ -93,7 +95,9 @@ AdminRouter.get('/district', function(req, res){
         res.redirect('/');
     }
 
-    School.districts.find({}, function (err, response) {
+    School.districts
+    .find({}) 
+    .exec( function (err, response) {
         if (err) return handleError(err);
     
         //console.log(response);        
@@ -334,6 +338,7 @@ AdminRouter.get('/school/edit', function(req, res) {
 
         School.schools
         .findOne(req.query)
+        .populate("district")
         .exec(function (err, response) {
             if (err) return handleError(err);
             schoolData = response; 
@@ -357,7 +362,7 @@ AdminRouter.post('/school/edit', function(req, res) {
 
 
     var updateInfo = {
-        district_id: req.body.districtid,
+        district: req.body.districtid,
         school_name: req.body.name,
         school_address: req.body.address,
         school_city: req.body.city,
