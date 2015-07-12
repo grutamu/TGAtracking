@@ -1,0 +1,36 @@
+extends sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("adminsidebar").className = "active";
+		}
+	fieldset
+		form(role='form', id="form_id", action="/admin/school/new",method="post", style='max-width: 300px;')
+			.form-group
+				label District:
+				select(form="form_id", name="districtid")
+					for district in districts
+						option(value = '#{district.district_id}') #{district.district_name}
+			.form-group
+				input.form-control(type='text', name="name", placeholder='School Name')
+			.form-group
+				input.form-control(type='text', name="address", placeholder='Address')
+			.form-group
+				input.form-control(type='text', name="city", placeholder='City')
+			.form-group
+				input.form-control(type='text', name="state", placeholder='State')
+			.form-group
+				input.form-control(type='text', name="zip", placeholder='Zipcode')
+			.form-group
+				label School Year:
+				select(form="form_id", name="schoolyear")
+					option(value = "2014 - 2015") 2014 - 2015
+					option(value = "2015 - 2016") 2015 - 2016
+			.form-group
+				label Is Active:
+				select(form="form_id", name="active")
+					option(value = "active") Active
+					option(value = "inactive") Inactive
+			button.btn.btn-default(type='submit') Submit
+			a(href='/admin/district')
+				button.btn.btn-primary(type="button") Cancel

@@ -17,22 +17,19 @@ block sidebar
 							a(href="/admin/district") Manage Districts
 						li.inactive
 							a(href="/admin/school") Manage Schools
-		if(types == "teacher")
-			ul.sys_nav
-				li.inactive(id='teachersidebar')
-					span Teacher
-					ul
-						li.inactive
-							a(href="/home") Teacher Page
 		if(types == "districtadmin")
 			ul.sys_nav
-				li.inactive(id='districtadminsidebar')
+				li.inactive(id='distadminsidebar')
 					span District Administrator
 					ul
 						li.inactive
 							a(href="/distadmin") District Admin Page
 						li.inactive
-							a(href="/distadmin/course") Manage Courses				
+							a(href="/distadmin/course") Manage Courses	
+						li.inactive
+							a(href="/distadmin/users") Manage Users
+						li.inactive
+							a(href="/distadmin/school") Manage Schools
 		if(types == "caseloadmanager")
 			ul.sys_nav
 				li.inactive(id='caseloadmanagersidebar')
@@ -40,6 +37,13 @@ block sidebar
 					ul
 						li.inactive
 							a(href="/home") Caseload Manager Page
+		if(types == "teacher")
+			ul.sys_nav
+				li.inactive(id='teachersidebar')
+					span Teacher
+					ul
+						li.inactive
+							a(href="/home") Teacher Page
 		if(types == "student")
 			ul.sys_nav
 				li.inactive(id='studentsidebar')

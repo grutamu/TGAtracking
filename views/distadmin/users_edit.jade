@@ -1,0 +1,53 @@
+extends ../sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("distadminsidebar").className = "active";
+		}
+	if(!data)
+		p Invalid user!
+		a(href="/distadmin/users") Go Back
+	if(data)
+		p Editing User #{data.info.firstname} #{data.info.lastname}
+		fieldset
+			form(role='form', action="/distadmin/users/edit",method="post", id="form_id")
+				#username
+					label(align="right") Username : 
+					input.form-control(type='text', name="username", value='#{data.username}', readonly)
+				br
+				br
+				#Firstname
+					label(align="right")  First Name : 
+					input.form-control(type='text', name="firstname", value='#{data.info.firstname}')
+				br
+				br
+				#Lastname
+					label(align="right")  Last Name : 
+					input.form-control(type='text', name="lastname", value='#{data.info.lastname}')
+				br
+				br
+				#Email
+					label(align="right")  Email : 
+					input.form-control(type='text', name="email", value='#{data.info.email}')
+				br
+				br
+				#Usertype
+					label(align="right")  Usertype : 
+					select(form="form_id",name="usertype", multiple)
+						option(id = "admin", value = "districtadmin") District Admin
+						option(id = "teacher", value = "teacher") Teacher
+						option(id = "caseloadmanager", value = "caseloadmanager") Caseload Manager
+						option(id = "student", value = "student") Student
+				br
+				br
+				br
+				br
+				br
+				button.btn.btn-default(type='submit') Submit
+				
+				a(href='/distadmin/users')
+					button.btn.btn-primary(type="button") Cancel
+
+		
+
+

@@ -1,0 +1,17 @@
+extends ../sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("distadminsidebar").className = "active";
+		}
+	p Users Page
+	p User Listing
+	each users, i in userQuery
+		a(href="/distadmin/users/edit?username=#{users.username}") Edit #{users.username}
+		br
+
+	br
+	br
+	a(href='/distadmin/users/new')
+		button.btn.btn-primary(type="button") New User
+

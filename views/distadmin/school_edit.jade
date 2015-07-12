@@ -1,0 +1,50 @@
+extends ../sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("distadminsidebar").className = "active";
+		}
+	//ToDo fix CSS 
+	form(role='form', action="/distadmin/school/edit",method="post", style='max-width: 300px;', id="form_id")
+		.row
+			label School ID
+			input.form-control(type='text', name="schooid", value='#{data.school_id}', readonly)
+		.row
+			label District:
+			//ToDo: Make sure the School's currect district is highlighted
+			select(form="form_id", name="districtid")
+				for district in districts
+					if district.district_id == data.district.district_id
+						option(value = '#{district._id}', selected) #{district.district_name}
+					if district.district_id != data.district.district_id
+						option(value = '#{district._id}') #{district.district_name}
+		.row
+			label School Name
+			input.form-control(type='text', name="name", value='#{data.school_name}')
+		.row
+			label School Address
+			input.form-control(type='txt', name="address", value='#{data.school_address}')
+		.row
+			label School City
+			input.form-control(type='text', name="city", value='#{data.school_city}')
+		.row
+			label School State
+			input.form-control(type='text', name="state", value='#{data.school_state}')
+		.row
+			label School Zipcode
+			input.form-control(type='text', name="zip", value='#{data.school_zip}')
+		.row
+			label School Year:
+			//ToDo: Make sure the School's currect year is highlighted
+			select(form="form_id", name="schoolyear")
+				option(value = "2014 - 2015") 2014 - 2015
+				option(value = "2015 - 2016") 2015 - 2016
+		.row
+			label Is Active:
+			select(form="form_id",name="active")
+				option(value = "active") Active
+				option(value = "inactive") Inactive
+		.submitrow
+			button(type='submit') Submit
+			a(href='/distadmin/school')
+				button(type="button") Cancel

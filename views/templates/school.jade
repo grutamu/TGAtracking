@@ -1,0 +1,50 @@
+extends sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("adminsidebar").className = "active";
+		}
+	p School Page
+	a(href='/admin/school/new')
+		button.btn.btn-primary(type="button") New School
+	p School Listing
+	form(role='form', action="/admin/school", method="post", id="form_id")
+		table
+			thead
+			tbody
+				tr
+					th
+						|Select
+					th
+						|School Name
+					th
+						|School District
+					th
+						|Address
+					th
+						|City
+					th
+						|State
+					th
+						|Zip
+				for school in schools		
+					tr
+						th
+							input.form-control(type='checkbox', name="#{school.school_id}")
+						td
+							a(href="/admin/school/edit?school_id=#{school.school_id}")  #{school.school_name} 
+						td
+							|#{school.district.district_name} 
+						td
+							|#{school.school_address} 
+						td
+							|#{school.school_city} 
+						td
+							|#{school.school_state}
+						td
+							|#{school.school_zip}
+		select(name="SubmitButtonSelector")
+			option(value = "none") -- --
+			option(value = "delete") Delete
+			option(value = "edit") Edit
+		button.btn.btn-default(type='submit') Submit	

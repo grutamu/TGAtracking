@@ -1,0 +1,48 @@
+extends ../sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("distadminsidebar").className = "active";
+		}
+	p Course Page!
+	a(href='/distadmin/course/new')
+		button(type="button") New Course
+	p Course Listing
+	form(role='form', action="distadmin/course", method="post", name="form_id")
+		table
+			thead
+			tbody
+				tr
+					th
+						|Select
+					th
+						|Course Name
+					th
+						|Course Number
+					th
+						|School
+					th
+						|Teacher
+					th
+						|Number of Students
+				for course in courses		
+					tr
+						th
+							input.form-control(type='checkbox', name="#{course.course_id}")
+						td
+							a(href="/distadmin/course/edit?course_id=#{course.course_id}")  #{course.course_name} 
+						td
+							|#{course.course_name} 
+						td
+							|#{course.school.school_name} 
+						td
+							|#{course.teacher.firstname} #{course.teacher.lastname}
+						td
+							|#{course.students.length}
+		select(name="SubmitButtonSelector")
+			option(value = "none") -- --
+			option(value = "delete") Delete
+			option(value = "edit") Edit
+		button.btn.btn-default(type='submit') Submit						
+
+
