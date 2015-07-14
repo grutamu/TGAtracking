@@ -1,5 +1,9 @@
-extends sidebar
+extends ../sidebar
 block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("adminsidebar").className = "active";
+		}
 	form(role='form', action="/admin/users/new",method="post")
 		.form-group
 			input.form-control(type='text', name="username", placeholder='Enter Username')

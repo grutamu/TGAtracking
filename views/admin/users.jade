@@ -1,0 +1,38 @@
+extends ../sidebar
+block sysmain
+	script.
+		window.onload = function(){
+			document.getElementById("adminsidebar").className = "active";
+		}
+	p Users Page
+	a(href='/admin/users/new')
+		button.btn.btn-primary(type="button") New User
+	p User Listing
+	form(role='form', action="/admin/school", method="post", id="form_id")
+		table
+			thead
+			tbody
+				tr
+					th
+						|Select
+					th
+						|Name
+					th
+						|Username
+					th
+						|Role
+				for users in userQuery		
+					tr
+						th
+							input.form-control(type='checkbox', name="#{users.username}")
+						td
+							a(href="/admin/users/edit?username=#{users.username}")  #{users.firstname} #{users.lastname}
+						td
+							|#{users.username} 
+						td
+							|#{users.usertype}
+		select(name="SubmitButtonSelector")
+			option(value = "none") -- --
+			option(value = "delete") Delete
+			option(value = "edit") Edit
+		button.btn.btn-default(type='submit') Submit

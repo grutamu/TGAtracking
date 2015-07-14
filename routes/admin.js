@@ -9,8 +9,8 @@ AdminRouter.get('/', function(req, res) {
 	if(!req.user){
         res.redirect('/');
     }
-
-    res.render('admin', { user : req.user });
+    
+    res.render('admin/admin', { user : req.user });
 });
 
 
@@ -24,7 +24,7 @@ AdminRouter.get('/users', function(req, res) {
     .exec(function(err, response){
         userQuery = response;
 
-        res.render('users', { user : req.user, userQuery: userQuery });
+        res.render('admin/users', { user : req.user, userQuery: userQuery });
     });
 });
 
@@ -41,10 +41,9 @@ AdminRouter.get('/users/edit', function(req, res) {
     Account
     .find(req.query) 
     .exec(function (err, response) {
-        console.log(response);
   		userData.info = response[0]; 
 
-    	res.render('users_edit', { user : req.user, data : userData});
+    	res.render('admin/users_edit', { user : req.user, data : userData});
 	})
 });
 
@@ -56,12 +55,9 @@ AdminRouter.post('/users/edit', function(req, res) {
 		usertype : req.body.usertype
 	}
 
-    console.log(req.body);
-
 	Account
     .findOneAndUpdate({username : req.body.username}, updateInfo)
     .exec(function(err, numberAffected, raw){
-        console.log("Updated :" + numberAffected, raw);
 		res.redirect('/admin/users');
 	});
 });
@@ -70,7 +66,7 @@ AdminRouter.get('/users/new', function(req, res) {
     if(!req.user){
         res.redirect('/');
     }
-    res.render('users_new', { user : req.user });
+    res.render('admin/users_new', { user : req.user });
 });
 
 AdminRouter.post('/users/new', function(req, res) {
@@ -82,10 +78,10 @@ AdminRouter.post('/users/new', function(req, res) {
         usertype : req.body.usertype
         }), req.body.password, function(err, account) {
         if (err) {
-            return res.render('users_new', { account : account });
+            return res.render('admin/users_new', { account : account });
         }
 
-        res.render('users_new', { user : req.user });
+        res.render('admin/users_new', { user : req.user });
     });
 });
 
@@ -97,11 +93,8 @@ AdminRouter.get('/district', function(req, res){
     db.districts
     .find({}) 
     .exec( function (err, response) {
-        if (err) return handleError(err);
-    
-        //console.log(response);        
-
-        res.render('district', { user : req.user , districts : response});
+        
+        res.render('admin/district', { user : req.user , districts : response});
     })
 
     
@@ -115,7 +108,7 @@ AdminRouter.post('/district', function(req, res) {
 
     distIDs.splice(distIDs.indexOf("SubmitButtonSelector"), 1 );
 
-    for(var i =0; i <= distIDs.length -1; i++){
+    for(var i =0; i < distIDs.length; i++){
 
         switch(req.body.SubmitButtonSelector){
 
@@ -128,10 +121,7 @@ AdminRouter.post('/district', function(req, res) {
                 res.redirect('/admin/district/edit?district_id=' + distIDs[i]);
                 break;
         }
-
     }
-
-
     res.redirect('/admin/district');
 });
 
@@ -139,7 +129,7 @@ AdminRouter.get('/district/new', function(req, res){
     if(!req.user){
         res.redirect('/');
     }
-    res.render('district_new', { user : req.user });
+    res.render('admin/district_new', { user : req.user });
 });
 
 AdminRouter.post('/district/new', function(req, res) {
@@ -163,7 +153,6 @@ AdminRouter.post('/district/new', function(req, res) {
         if (err) {
             //return res.render('users_new', { account : account });
         }
-
         res.redirect('/admin/district');
     });
 });
@@ -181,14 +170,13 @@ AdminRouter.get('/district/edit', function(req, res) {
         if (err) return handleError(err);
         districtData = response[0]; 
         console.log(districtData);
-        res.render('district_edit', { user : req.user, data : districtData});
+        res.render('admin/district_edit', { user : req.user, data : districtData});
     })
 });
 
 AdminRouter.post('/district/edit', function(req, res) {
 
     var isactive;
-
     if(req.body.active == "active")
         isactive = true
     if(req.body.active == "inactive")
@@ -204,9 +192,9 @@ AdminRouter.post('/district/edit', function(req, res) {
         is_active: isactive,
     }
 
-    db.districts.findOneAndUpdate({district_id : req.body.id}, updateInfo,function(err, numberAffected, raw){
-        if (err) return handleError(err);
-        console.log("Updated :" + numberAffected, raw);
+    db.districts
+    .findOneAndUpdate({district_id : req.body.id}, updateInfo)
+    .exec(function(err, numberAffected, raw){
         res.redirect('/admin/district');
     });
 });
@@ -217,28 +205,20 @@ AdminRouter.get('/school', function(req, res){
     if(!req.user){
         res.redirect('/');
     }
-
     var SchoolResponse;
 
     db.schools
     .find({}) 
     .populate("district")
     .exec(function (err, response) {
-        if (err) return handleError(err);
-        
         SchoolResponse = response;
-
-        console.log(SchoolResponse); 
-        res.render('school', { user : req.user , schools : SchoolResponse});
-               
-        
+        res.render('admin/school', { user : req.user , schools : SchoolResponse});
     });
 });
 
 AdminRouter.post('/school', function(req, res) {
 
     var schoolIDs = Object.keys(req.body);
-
 
     schoolIDs.splice(schoolIDs.indexOf("SubmitButtonSelector"), 1 );
 
@@ -275,7 +255,7 @@ AdminRouter.get('/school/new', function(req, res){
     .find({}) 
     .exec(function(err, response){
 
-        res.render('school_new', { user : req.user, districts : response});
+        res.render('admin/school_new', { user : req.user, districts : response});
 
     });
 
@@ -346,7 +326,7 @@ AdminRouter.get('/school/edit', function(req, res) {
             if (err) return handleError(err);
             schoolData = response; 
             console.log(schoolData);
-            res.render('school_edit', { user : req.user, data : schoolData, districts: districtData});
+            res.render('admin/school_edit', { user : req.user, data : schoolData, districts: districtData});
         })
 
     })
