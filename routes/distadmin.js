@@ -1,7 +1,7 @@
 var express = require('express');
 var Account = require('../models/account');
 var DistAdminRouter = express.Router();
-var db = require('../models/school');
+var db = require('../models/db');
 
 
 DistAdminRouter.get('/', function(req, res) {
@@ -107,6 +107,15 @@ DistAdminRouter.get('/course/edit', function(req, res) {
                 .find({})
                 .exec( function(err, Schools){
                     SchoolData = Schools;
+
+                    for(var x = 0; x < StudentData.length; x++){
+                        for(var i = 0; i < courseData.students.length;i++){
+                            if (courseData.students[i].userid == StudentData[x].userid){
+                                StudentData[x].IsInCourse = true;
+                            }
+                        }
+                    }
+
                     res.render('distadmin/course_edit', { 
                         user : req.user, 
                         students: StudentData, 
@@ -124,9 +133,6 @@ DistAdminRouter.post('/course/edit', function(req, res) {
     if(!req.user){
         res.redirect('/');
     }
-
-
-
     var updateInfo = {
         course_name: req.body.course_name,
         course_number: req.body.course_number,

@@ -35,13 +35,17 @@ block sysmain
 				for teacher in teachers
 					if teacher.userid == courses.teacher.userid
 						option(value = '#{teacher._id}', selected) #{teacher.firstname} #{teacher.lastname}
-					if teacher.userid != courses.teacher.userid
+					else
 						option(value = '#{teacher._id}') #{teacher.firstname} #{teacher.lastname}		
 		.row
 			label Students
 			select(form="form_id", name="students", multiple, required)
 				for student in students
-					option(value = '#{student._id}', id = '#{student._id}') #{student.firstname} #{student.lastname}
+					if student.IsInCourse == true
+						option(value = '#{student._id}', id ='#{student._id}', selected) #{student.firstname} #{student.lastname}
+					else
+						option(value = '#{student._id}', id ='#{student._id}') #{student.firstname} #{student.lastname}
+
 		.row
 			label Is Active:
 			select(form="form_id",name="active")
@@ -49,5 +53,5 @@ block sysmain
 				option(value = "inactive") Inactive
 		.submitrow
 			button(type='submit') Submit
-			a(href='/admin/school')
+			a(href='/distadmin/school')
 				button(type="button") Cancel

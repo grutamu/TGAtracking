@@ -1,6 +1,6 @@
 extends sidebar
 block sysmain
-	form(role='form', action="/distadmin/users/new",method="post")
+	form(role='form', action="/admin/users/new",method="post")
 		.form-group
 			input.form-control(type='text', name="username", placeholder='Enter Username')
 			br
@@ -22,5 +22,5 @@ block sysmain
 			br
 			br
 			button.btn.btn-default(type='submit') Submit
-			a(href='/distadmin/users')
+			a(href='/admin/users')
 				button.btn.btn-primary(type="button") Cancel

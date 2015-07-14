@@ -1,8 +1,7 @@
 var express = require('express');
 var Account = require('../models/account');
 var AdminRouter = express.Router();
-var School = require('../models/school');
-
+var db = require('../models/db');
 
 //TODO: Makesure only admins can access these pages!
 
@@ -20,11 +19,9 @@ AdminRouter.get('/users', function(req, res) {
         res.redirect('/');
     }
 
-    Account.find({}, 'username', function(err, response){
-        if (err) return handleError(err);
-
-        console.log("userQuery: "+ response);
-
+    Account
+    .find({})
+    .exec(function(err, response){
         userQuery = response;
 
         res.render('users', { user : req.user, userQuery: userQuery });
@@ -41,7 +38,9 @@ AdminRouter.get('/users/edit', function(req, res) {
     	info : {}
     }
 
-    Account.find(req.query, function (err, response) {
+    Account
+    .find(req.query) 
+    .exec(function (err, response) {
         console.log(response);
   		userData.info = response[0]; 
 
@@ -95,7 +94,7 @@ AdminRouter.get('/district', function(req, res){
         res.redirect('/');
     }
 
-    School.districts
+    db.districts
     .find({}) 
     .exec( function (err, response) {
         if (err) return handleError(err);
@@ -121,7 +120,7 @@ AdminRouter.post('/district', function(req, res) {
         switch(req.body.SubmitButtonSelector){
 
             case "delete":
-                School.districts.remove({district_id: distIDs[i]}, function(err, success){ 
+                db.districts.remove({district_id: distIDs[i]}, function(err, success){ 
                     console.log(err, success)
                 });
                 break;
@@ -153,7 +152,7 @@ AdminRouter.post('/district/new', function(req, res) {
     if(req.body.active == "inactive")
         isactive = false
 
-    School.districts.create({
+    db.districts.create({
         district_name: req.body.name,
         district_address: req.body.address,
         district_city: req.body.city,
@@ -178,7 +177,7 @@ AdminRouter.get('/district/edit', function(req, res) {
 
 
 
-    School.districts.find(req.query, function (err, response) {
+    db.districts.find(req.query, function (err, response) {
         if (err) return handleError(err);
         districtData = response[0]; 
         console.log(districtData);
@@ -205,7 +204,7 @@ AdminRouter.post('/district/edit', function(req, res) {
         is_active: isactive,
     }
 
-    School.districts.findOneAndUpdate({district_id : req.body.id}, updateInfo,function(err, numberAffected, raw){
+    db.districts.findOneAndUpdate({district_id : req.body.id}, updateInfo,function(err, numberAffected, raw){
         if (err) return handleError(err);
         console.log("Updated :" + numberAffected, raw);
         res.redirect('/admin/district');
@@ -221,7 +220,7 @@ AdminRouter.get('/school', function(req, res){
 
     var SchoolResponse;
 
-    School.schools
+    db.schools
     .find({}) 
     .populate("district")
     .exec(function (err, response) {
@@ -248,8 +247,12 @@ AdminRouter.post('/school', function(req, res) {
         switch(req.body.SubmitButtonSelector){
 
             case "delete":
-                School.schools.remove({school_id: schoolIDs[i]}, function(err, success){ 
-                    console.log(err, success)
+                db.schools
+                .remove({school_id: schoolIDs[i]}) 
+                .exec(function(err, success){
+                    if (!err){
+                        console.log("Delete Successful!")
+                    }
                 });
                 break;
             case "edit":
@@ -268,7 +271,9 @@ AdminRouter.get('/school/new', function(req, res){
         res.redirect('/');
     }
 
-    School.districts.find({}, function(err, response){
+    db.districts
+    .find({}) 
+    .exec(function(err, response){
 
         res.render('school_new', { user : req.user, districts : response});
 
@@ -287,13 +292,11 @@ AdminRouter.post('/school/new', function(req, res) {
     if(req.body.active == "inactive")
         isactive = false
 
-    School.districts
+    db.districts
     .findOne({district_id: req.body.districtid})
     .exec(function(err, District){
-        console.log(District);
-        
 
-        var NewSchool = new School.schools({
+        var NewSchool = new db.schools({
             district: District._id,
             school_name: req.body.name,
             school_address: req.body.address,
@@ -330,13 +333,13 @@ AdminRouter.get('/school/edit', function(req, res) {
     var schoolData;
     var districtData;
 
-    School.districts
+    db.districts
     .find({})
     .exec(function (err, response) {
 
         districtData = response;
 
-        School.schools
+        db.schools
         .findOne(req.query)
         .populate("district")
         .exec(function (err, response) {
@@ -372,29 +375,14 @@ AdminRouter.post('/school/edit', function(req, res) {
         school_is_active: isactive,
     }
 
-    School.schools.findOneAndUpdate({school_id : req.body.schooid}, updateInfo,function(err, numberAffected, raw){
+    db.schools
+    .findOneAndUpdate({school_id : req.body.schooid}, updateInfo)
+    .exec(function(err, numberAffected, raw){
         if (err) console.log(err);
         console.log("Updated :" + numberAffected, raw);
         res.redirect('/admin/school');
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 module.exports = AdminRouter;
