@@ -22,10 +22,33 @@ AdminRouter.get('/users', function(req, res) {
     Account
     .find({})
     .exec(function(err, response){
+
         userQuery = response;
 
         res.render('admin/users', { user : req.user, userQuery: userQuery });
     });
+});
+
+AdminRouter.post('/users', function(req, res) {
+
+    var userIDs = Object.keys(req.body);
+
+    userIDs.splice(userIDs.indexOf("SubmitButtonSelector"), 1 );
+
+    for(var i =0; i < userIDs.length; i++){
+
+        switch(req.body.SubmitButtonSelector){
+            case "delete":
+                Account.remove({userid: userIDs[i]}, function(err, success){ 
+                    console.log(err)
+                });
+                break;
+            case "edit":
+                res.redirect('/admin/users/edit?userid=' + userIDs[i]);
+                break;
+        }
+    }
+    res.redirect('/admin/users');
 });
 
 AdminRouter.get('/users/edit', function(req, res) {
@@ -33,18 +56,25 @@ AdminRouter.get('/users/edit', function(req, res) {
         res.redirect('/');
     }
 
-    var userData = {
-    	username : req.query.username,
-    	info : {}
-    }
+    var userData;
+    var schoolData;
 
     Account
-    .find(req.query) 
-    .exec(function (err, response) {
-  		userData.info = response[0]; 
+    .findOne({userid : req.query.userid})
+    .populate("school")
+    .exec(function(err, response) {
 
-    	res.render('admin/users_edit', { user : req.user, data : userData});
-	})
+        userData = response; 
+
+        db.schools
+        .find({})
+        .exec( function(err, Schools){
+            schoolData = Schools;
+
+
+            res.render('admin/users_edit', {user : req.user, userData : userData, schools : schoolData });
+        });
+    });
 });
 
 AdminRouter.post('/users/edit', function(req, res) {
@@ -52,12 +82,17 @@ AdminRouter.post('/users/edit', function(req, res) {
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,
-		usertype : req.body.usertype
-	}
+		usertype : req.body.usertype,
+        stateid : req.body.stateid,
+        school : req.body.school
+	};
 
+
+    console.log(req.body);
 	Account
-    .findOneAndUpdate({username : req.body.username}, updateInfo)
+    .findOneAndUpdate({userid : req.body.userid}, updateInfo)
     .exec(function(err, numberAffected, raw){
+        if(err) console.log(err);
 		res.redirect('/admin/users');
 	});
 });
@@ -66,22 +101,34 @@ AdminRouter.get('/users/new', function(req, res) {
     if(!req.user){
         res.redirect('/');
     }
-    res.render('admin/users_new', { user : req.user });
+
+    var schoolData;
+
+    db.schools
+    .find({})
+    .exec( function(err, Schools){
+        schoolData = Schools;
+        
+        res.render('admin/users_new', { user : req.user, schools : schoolData });
+    });
+    
 });
 
 AdminRouter.post('/users/new', function(req, res) {
+
+    console.log(req.body);
+
     Account.register(new Account({ 
         username : req.body.username, 
         firstname : req.body.firstname,
         lastname : req.body.lastname,
         email : req.body.email,
-        usertype : req.body.usertype
+        usertype : req.body.usertype,
+        stateid : req.body.stateid,
+        school : req.body.school
         }), req.body.password, function(err, account) {
-        if (err) {
-            return res.render('admin/users_new', { account : account });
-        }
 
-        res.render('admin/users_new', { user : req.user });
+        res.redirect('/admin/users');
     });
 });
 

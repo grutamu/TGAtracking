@@ -2,7 +2,7 @@ var express = require('express');
 var Account = require('../models/account');
 var DistAdminRouter = express.Router();
 var db = require('../models/db');
-
+var async = require('async');
 
 DistAdminRouter.get('/', function(req, res) {
 	if(!req.user){
@@ -17,15 +17,44 @@ DistAdminRouter.get('/course', function(req, res) {
         res.redirect('/');
     }
 
-    db.courses
-    .find({})
-    .populate("school")
-    .populate("teacher")
-    .populate("students")
-    .exec( function(err, courses) {
-    	
-    	res.render('distadmin/course', { user : req.user, courses : courses });
+    var courseData;
 
+    async.waterfall([
+        function(next){
+            console.log("before DB call");
+            db.courses
+            .find({})
+            .exec(function(err, courseQuery){
+                next(err, courseQuery);
+            });
+        },
+        function(courseQuery, next){
+            courseData = courseQuery;
+
+            for(i = 0; i < courseData.length; i++){
+
+                db.course_teacher_link
+                .findOne({course: courseData[i]._id})
+                .populate("teacher")
+                .select("teacher")
+                .exec(function(err, query){
+                    courseData[i].teacher = query;
+                });
+
+                db.course_student_link
+                .find({course: courseData[i]._id})
+                .populate("student")
+                .select("student")
+                .exec(function(err, query){
+                    courseData[i].students = query;
+                });
+            }
+            next(null);
+        }
+    ], function(){
+        console.log("Rending Page");
+        console.log(courseData);
+        res.render('distadmin/course', { user : req.user, courses : courseData });
     });
 });
 
@@ -65,7 +94,27 @@ DistAdminRouter.post('/course/new', function(req, res) {
 	if(!req.user){
         res.redirect('/');
     }
-    db.courses.create(req.body)
+
+    //ToDo: Add in is active
+    var CourseData = new db.courses({
+        course_name: req.body.course_name,
+        course_number: req.body.course_number,
+        school_year: req.body.school_year
+    });
+
+    for(var i = 0; i < req.body.students.length; i++){
+        db.course_student_link
+        .create({
+            course: CourseData._id,
+            student: req.body.students[i]
+        });
+    }
+
+    db.course_teacher_link
+    .create({
+        course: CourseData._id,
+        teacher: req.body.teacher
+    });
 
 
     res.redirect('/distadmin/course');
@@ -158,7 +207,8 @@ DistAdminRouter.get('/users', function(req, res) {
         res.redirect('/');
     }
 
-    Account.find({}, 'username', function(err, response){
+    Account.find({})
+    .exec(function(err, response){
         userQuery = response;
         res.render('distadmin/users', { user : req.user, userQuery: userQuery });
     });
@@ -169,13 +219,13 @@ DistAdminRouter.get('/users/edit', function(req, res) {
         res.redirect('/');
     }
 
-    var userData = {
-        username : req.query.username,
-        info : {}
-    }
+    var userData;
 
-    Account.find(req.query, function (err, response) {
-        userData.info = response[0]; 
+    Account.findOne(req.query, function (err, response) {
+        userData = response; 
+
+        console.log(userData);
+
         res.render('distadmin/users_edit', { user : req.user, data : userData});
     })
 });
@@ -374,9 +424,6 @@ DistAdminRouter.post('/school/edit', function(req, res) {
         res.redirect('/distadmin/school');
     });
 });
-
-
-
 
 
 

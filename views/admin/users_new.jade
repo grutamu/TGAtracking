@@ -4,27 +4,33 @@ block sysmain
 		window.onload = function(){
 			document.getElementById("adminsidebar").className = "active";
 		}
-	form(role='form', action="/admin/users/new",method="post")
-		.form-group
-			input.form-control(type='text', name="username", placeholder='Enter Username')
-			br
-			br
-		.form-group
-			input.form-control(type='password', name="password", placeholder='Password')
-			br
-			br
-			input.form-control(type='text', name="firstname", placeholder='First Name')
-			br
-			br
-			input.form-control(type='text', name="lastname", placeholder='Last Name')
-			br
-			br
-			input.form-control(type='text', name="email", placeholder='Email')
-			br
-			br
-			input.form-control(type='text', name="usertype", placeholder='User Type')
-			br
-			br
-			button.btn.btn-default(type='submit') Submit
+	form(role='form', action="/admin/users/new",method="post", id="form_id")
+		.row
+			input(type='text', name="username", placeholder='Enter Username')
+		.row
+			input(type='password', name="password", placeholder='Password')
+		.row
+			input(type='text', name="firstname", placeholder='First Name')
+		.row
+			input(type='text', name="lastname", placeholder='Last Name')
+		.row
+			input(type='text', name="email", placeholder='Email')
+		.row
+			label User Permissions
+			select(form="form_id",name="usertype", multiple)
+						option(value = "admin") Super Admin
+						option(value = "districtadmin") District Admin
+						option(value = "teacher") Teacher
+						option(value = "caseloadmanager") Caseload Manager
+						option(value = "student") Student
+		.row
+			input(type='text', name="stateID", placeholder="State ID")
+		.row
+			label School
+			select(form="form_id", name="school", required)
+				for school in schools
+						option(value = '#{school._id}') #{school.school_name}
+		.row
+			button(type='submit') Submit
 			a(href='/admin/users')
-				button.btn.btn-primary(type="button") Cancel
+				button(type="button") Cancel

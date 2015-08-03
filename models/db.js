@@ -20,12 +20,9 @@ database.caseloadmgr_students = mongoose.model('caseloadmgr_students', caseloadm
 var courses = new Schema({
     course_name: String,
     course_number: Number,
-    school: {type: Schema.Types.ObjectId, ref: 'schools'},
     school_year: String,
     course_begin_date: Date,
     course_end_date: Date,
-    teacher: {type: Schema.Types.ObjectId, ref: 'Account'},
-    students: [{type: Schema.Types.ObjectId, ref: 'Account'}],
     completed_date: Date,
     course_is_active: Boolean,
 });
@@ -34,10 +31,25 @@ courses.plugin(timestamps);
 courses.plugin(autoIncrement.plugin, {model: 'courses', field: 'course_id'});
 database.courses = mongoose.model('courses', courses);
 
+var course_teacher_link = new Schema({
+    course: {type: Schema.Types.ObjectId, ref: 'courses'},
+    teacher: {type: Schema.Types.ObjectId, ref: 'Account'}
+});
+
+course_teacher_link.plugin(timestamps);
+database.course_teacher_link = mongoose.model('course_teacher_link', course_teacher_link);
+
+var course_student_link = new Schema({
+    course: {type: Schema.Types.ObjectId, ref: 'courses'},
+    student: {type: Schema.Types.ObjectId, ref: 'Account'}
+});
+
+course_student_link.plugin(timestamps);
+database.course_student_link = mongoose.model('course_student_link', course_student_link);
 
 var course_attendance = new Schema({
-    course: {type: Schema.Types.ObjectId, ref: 'courses'},
-   	user: {type: Schema.Types.ObjectId, ref: 'Account'},
+    course_id: Number,
+   	user_id: Number,
    	attendance_date: Date,
    	attendance_type: String,
    	tardy_time: String

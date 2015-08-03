@@ -4,51 +4,49 @@ block sysmain
 		window.onload = function(){
 			document.getElementById("adminsidebar").className = "active";
 		}
-	if(!data)
+	if(!userData)
 		p Invalid user!
 		a(href="/admin/users") Go Back
-	if(data)
-		p Editing User #{data.info.firstname} #{data.info.lastname}
+	if(userData)
+		p
 		fieldset
+			legend Editing User #{userData.firstname} #{userData.lastname}
 			form(role='form', action="/admin/users/edit",method="post", id="form_id")
-				#username
+				.row
+					label(align="right") System ID : 
+					input(type='text', name="userid", value='#{userData.userid}', readonly)
+				.row
 					label(align="right") Username : 
-					input.form-control(type='text', name="username", value='#{data.username}', readonly)
-				br
-				br
-				#Firstname
-					label(align="right")  First Name : 
-					input.form-control(type='text', name="firstname", value='#{data.info.firstname}')
-				br
-				br
-				#Lastname
-					label(align="right")  Last Name : 
-					input.form-control(type='text', name="lastname", value='#{data.info.lastname}')
-				br
-				br
-				#Email
-					label(align="right")  Email : 
-					input.form-control(type='text', name="email", value='#{data.info.email}')
-				br
-				br
-				#Usertype
-					label(align="right")  Usertype : 
+					input(type='text', name="username", value='#{userData.username}', readonly)
+				.row
+					label(align="right") First Name : 
+					input(type='text', name="firstname", value='#{userData.firstname}')
+				.row
+					label(align="right") Last Name : 
+					input(type='text', name="lastname", value='#{userData.lastname}')
+				.row
+					label(align="right") Email : 
+					input(type='text', name="email", value='#{userData.email}')
+				.row
+					label(align="right") Usertype : 
 					select(form="form_id",name="usertype", multiple)
-						option(id = "admin", value = "admin") Admin
-						option(id = "admin", value = "districtadmin") District Admin
-						option(id = "teacher", value = "teacher") Teacher
-						option(id = "caseloadmanager", value = "caseloadmanager") Caseload Manager
-						option(id = "student", value = "student") Student
-				br
-				br
-				br
-				br
-				br
-				button.btn.btn-default(type='submit') Submit
-				
-				a(href='/admin/users')
-					button.btn.btn-primary(type="button") Cancel
-
-		
-
-
+						option(value = "admin") Super Admin
+						option(value = "districtadmin") District Admin
+						option(value = "teacher") Teacher
+						option(value = "caseloadmanager") Caseload Manager
+						option(value = "student") Student
+				.row
+					label(align="right") State ID : 
+					input(type='text', name="stateid", value='#{userData.stateid}')
+				.row
+					label School
+					select(form="form_id", name="school", required)
+						for school in schools
+							if school.school_id == userData.school.school_id
+								option(value = '#{school._id}', selected) #{school.school_name}
+							else 
+								option(value = '#{school._id}') #{school.school_name}
+				.row
+					button(type='submit') Submit				
+					a(href='/admin/users')
+						button(type="button") Cancel

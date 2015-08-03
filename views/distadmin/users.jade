@@ -5,13 +5,34 @@ block sysmain
 			document.getElementById("distadminsidebar").className = "active";
 		}
 	p Users Page
-	p User Listing
-	each users, i in userQuery
-		a(href="/distadmin/users/edit?username=#{users.username}") Edit #{users.username}
-		br
-
-	br
-	br
 	a(href='/distadmin/users/new')
 		button.btn.btn-primary(type="button") New User
-
+	p User Listing
+	form(role='form', action="/distadmin/user", method="post", id="form_id")
+		table
+			thead
+			tbody
+				tr
+					th
+						|Select
+					th
+						|Name
+					th
+						|Username
+					th
+						|Role
+				for users in userQuery		
+					tr
+						th
+							input.form-control(type='checkbox', name="#{users.username}")
+						td
+							a(href="/distadmin/users/edit?username=#{users.username}")  #{users.firstname} #{users.lastname}
+						td
+							|#{users.username} 
+						td
+							|#{users.usertype}
+		select(name="SubmitButtonSelector")
+			option(value = "none") -- --
+			option(value = "delete") Delete
+			option(value = "edit") Edit
+		button.btn.btn-default(type='submit') Submit

@@ -6,9 +6,9 @@ block sysmain
 		}
 	p Users Page
 	a(href='/admin/users/new')
-		button.btn.btn-primary(type="button") New User
+		button(type="button") New User
 	p User Listing
-	form(role='form', action="/admin/school", method="post", id="form_id")
+	form(role='form', action="/admin/users", method="post", id="form_id")
 		table
 			thead
 			tbody
@@ -24,9 +24,9 @@ block sysmain
 				for users in userQuery		
 					tr
 						th
-							input.form-control(type='checkbox', name="#{users.username}")
+							input(type='checkbox', name="#{users.userid}")
 						td
-							a(href="/admin/users/edit?username=#{users.username}")  #{users.firstname} #{users.lastname}
+							a(href="/admin/users/edit?userid=#{users.userid}")  #{users.firstname} #{users.lastname}
 						td
 							|#{users.username} 
 						td
@@ -35,4 +35,4 @@ block sysmain
 			option(value = "none") -- --
 			option(value = "delete") Delete
 			option(value = "edit") Edit
-		button.btn.btn-default(type='submit') Submit
+		button(type='submit') Submit

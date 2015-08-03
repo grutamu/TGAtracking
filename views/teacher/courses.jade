@@ -1,0 +1,86 @@
+extends ../sidebar
+block sysmain
+    script.
+        $(document).ready(function() 
+            { 
+                document.getElementById("teachersidebar").className = "active";            
+                //tablesorter pagination                    
+                $("#coursesTable").tablesorter({
+                    widthFixed: true, 
+                    widgets: ['zebra']
+                });
+            } 
+        );
+    fieldset
+        legend Teacher Information
+        table
+            tr
+                td(width='340' valign="top")
+                    .row
+                        label Teacher Name:                        
+                        span.reg_text #{teacher.lastname}, #{teacher.firstname}
+                    .row
+                        label Teacher ID:
+                        span.reg_text #{teacher.stateid}
+                td(valign="top")
+                    .row
+                        label School:
+                        span.reg_text #{teacher.school.school_name}
+                    .row
+                        label Is Active:
+                        if teacher.user_is_active
+                            span.reg_text Yes
+                        else
+                            span.reg_text No                     
+    br
+    strong Courses This Teacher is Teaching
+    br
+    table(class="tablesorter-default", id="coursesTable" role="grid")
+        thead
+            tr
+                th
+                    |Course Name
+                th
+                    |Course Number
+                th
+                    |Section
+                th
+                    |Students
+                th
+                    |Compleate Date
+                th
+        tfoot
+            tr
+                th
+                    |Course Name
+                th
+                    |Course Number
+                th
+                    |Section
+                th
+                    |Students
+                th
+                    |Compleate Date
+                th
+        for courses in courseData
+            tr
+                td
+                    |#{courses.course_name}
+                td
+                    |#{courses.course_number}
+                td
+                    |Section WiP
+                td
+                    |#{courses.students.length}
+                td
+                    |#{courses.completed_date}
+                td
+
+
+
+
+
+
+
+
+

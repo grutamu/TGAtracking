@@ -11,8 +11,8 @@ var LocalStrategy = require('passport-local').Strategy;
 
 var admin = require('./routes/admin');
 var distadmin = require('./routes/distadmin');
+var teacher = require('./routes/teacher');
 var routes = require('./routes/index');
-
 
 
 var app = express();
@@ -39,6 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/admin', admin);
 app.use('/distadmin', distadmin);
+app.use('/teacher', teacher);
 app.use('/', routes);
 
 
