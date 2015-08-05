@@ -124,7 +124,6 @@ AdminRouter.post('/users/new', isLoggedInAndAdmin, function(req, res) {
             console.log("username Taken!")
             console.log(err)
         } else {
-            console.log("is in else")
             var queryString = "INSERT INTO users ( username, password, firstname, lastname, email, usertype, stateid, schoolid ) values ( ?, ?, ?, ?, ?, ?, ?, ? )"
 
             connection.query(queryString, [
@@ -137,7 +136,6 @@ AdminRouter.post('/users/new', isLoggedInAndAdmin, function(req, res) {
                     newUserInfo.stateid,
                     newUserInfo.schoolid
                 ], function(err){
-                    console.log("is in last query")
                     if(err){
                         console.log(err)
                     }
@@ -150,14 +148,14 @@ AdminRouter.post('/users/new', isLoggedInAndAdmin, function(req, res) {
 
 AdminRouter.get('/district',isLoggedInAndAdmin, function(req, res){
 
-    db.districts
-    .find({}) 
-    .exec( function (err, response) {
-        
-        res.render('admin/district', { user : req.user , districts : response});
-    })
 
-    
+    connection.query("SELECT * FROM districts", function(err, rows){
+        if(err){
+            console.log(err)
+        }
+
+        res.render('admin/district', { user : req.user , districts : rows});
+    })
 });
 
 AdminRouter.post('/district', isLoggedInAndAdmin, function(req, res) {
@@ -172,85 +170,100 @@ AdminRouter.post('/district', isLoggedInAndAdmin, function(req, res) {
 
         switch(req.body.SubmitButtonSelector){
 
-            case "delete":
-                db.districts.remove({district_id: distIDs[i]}, function(err, success){ 
-                    console.log(err, success)
-                });
-                break;
-            case "edit":
-                res.redirect('/admin/district/edit?district_id=' + distIDs[i]);
+            case "archive":
+                //Archive Logic here
                 break;
         }
     }
     res.redirect('/admin/district');
 });
 
-AdminRouter.get('/district/new',isLoggedInAndAdmin, function(req, res){
-
+AdminRouter.get('/district/new', isLoggedInAndAdmin, function(req, res){
     res.render('admin/district_new', { user : req.user });
 });
 
 AdminRouter.post('/district/new', isLoggedInAndAdmin, function(req, res) {
-    
+    console.log(req.body)
 
-    var isactive;
+    var is_active;
+    if(req.body.is_active == "active")
+        is_active = 1
+    if(req.body.is_active == "inactive")
+        is_active = 0
 
-    if(req.body.active == "active")
-        isactive = true
-    if(req.body.active == "inactive")
-        isactive = false
+    var newDistrictInfo = { 
+        district_name : req.body.district_name, 
+        district_address : req.body.district_address,
+        district_city : req.body.district_city,
+        district_state : req.body.district_state,
+        district_zip : req.body.district_zip,
+        is_active : is_active
+    }
 
-    db.districts.create({
-        district_name: req.body.name,
-        district_address: req.body.address,
-        district_city: req.body.city,
-        district_state: req.body.state,
-        district_zip: req.body.zip,
-        is_active: isactive,
-    }, function(err) {
-        if (err) {
-            //return res.render('users_new', { account : account });
-        }
-        res.redirect('/admin/district');
+    //TODO: Make this a function? or even more put this in the db.js and only make DB calls from there.
+    connection.query("SELECT * FROM districts WHERE district_name = ?",[newDistrictInfo.district_name], function(err, rows) {
+        if (err)
+            console.log(err);
+        if (rows.length) {
+            //TODO: Flash something saying "ERR USERNAME TAKEN"
+            console.log("district with that name exists!")
+            console.log(err)
+        } else {
+            var queryString = "INSERT INTO districts ( district_name, district_address, district_city, district_state, district_zip, is_active) values ( ?, ?, ?, ?, ?, ? )"
+
+            connection.query(queryString, [
+                    newDistrictInfo.district_name,
+                    newDistrictInfo.district_address,
+                    newDistrictInfo.district_city,
+                    newDistrictInfo.district_state,
+                    newDistrictInfo.district_zip,
+                    newDistrictInfo.is_active
+                ], function(err){
+                    if(err){
+                        console.log(err)
+                    }
+            });
+        }   
     });
+        res.redirect('/admin/district');
 });
 
-AdminRouter.get('/district/edit',isLoggedInAndAdmin, function(req, res) {
-
-    var districtData;
-
-
-
-    db.districts.find(req.query, function (err, response) {
-        if (err) return handleError(err);
-        districtData = response[0]; 
-        console.log(districtData);
-        res.render('admin/district_edit', { user : req.user, data : districtData});
-    })
+AdminRouter.get('/district/edit', isLoggedInAndAdmin, function(req, res) {
+    connection.query("SELECT * FROM districts WHERE district_id = ?", [req.query.district_id], function(err, rows){
+        if(err){
+            console.log(err);
+        }
+        res.render('admin/district_edit', { user : req.user, data : rows[0]});
+    });
 });
 
 AdminRouter.post('/district/edit', isLoggedInAndAdmin, function(req, res) {
 
-    var isactive;
-    if(req.body.active == "active")
-        isactive = true
-    if(req.body.active == "inactive")
-        isactive = false
+    var is_active;
+    if(req.body.is_active == "active")
+        is_active = 1
+    if(req.body.is_active == "inactive")
+        is_active = 0
 
-
-    var updateInfo = {
-        district_name: req.body.name,
-        district_address: req.body.address,
-        district_city: req.body.city,
-        district_state: req.body.state,
-        district_zip: req.body.zip,
-        is_active: isactive,
+    var updateDistrictInfo = { 
+        district_id : req.body.district_id,
+        district_name : req.body.district_name, 
+        district_address : req.body.district_address,
+        district_city : req.body.district_city,
+        district_state : req.body.district_state,
+        district_zip : req.body.district_zip,
+        is_active : is_active
     }
 
-    db.districts
-    .findOneAndUpdate({district_id : req.body.id}, updateInfo)
-    .exec(function(err, numberAffected, raw){
+    var queryString = "UPDATE districts SET district_address = ?, district_city = ?, district_state = ?, district_zip = ?, is_active = ? WHERE district_id = ?"
+
+    connection.query(queryString, [ updateDistrictInfo.district_address, updateDistrictInfo.district_city, updateDistrictInfo.district_state, updateDistrictInfo.district_zip, updateDistrictInfo.is_active, updateDistrictInfo.district_id ], function(err){
+
+        if(err) console.log(err);
+
+
         res.redirect('/admin/district');
+
     });
 });
 
@@ -260,12 +273,11 @@ AdminRouter.get('/school', isLoggedInAndAdmin, function(req, res){
 
     var SchoolResponse;
 
-    db.schools
-    .find({}) 
-    .populate("district")
-    .exec(function (err, response) {
-        SchoolResponse = response;
+    connection.query("SELECT * FROM schools", function(err, rows){
+
+        schoolResponse = rows;
         res.render('admin/school', { user : req.user , schools : SchoolResponse});
+
     });
 });
 
@@ -279,17 +291,8 @@ AdminRouter.post('/school', isLoggedInAndAdmin, function(req, res) {
 
         switch(req.body.SubmitButtonSelector){
 
-            case "delete":
-                db.schools
-                .remove({school_id: schoolIDs[i]}) 
-                .exec(function(err, success){
-                    if (!err){
-                        console.log("Delete Successful!")
-                    }
-                });
-                break;
-            case "edit":
-                res.redirect('/admin/school/edit?school_id=' + schoolIDs[i]);
+            case "archive":
+                //archive logic
                 break;
         }
 
