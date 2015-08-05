@@ -1,7 +1,7 @@
 var express = require('express');
-var Account = require('../models/account');
+var Account;
 var AdminRouter = express.Router();
-var db = require('../models/db');
+var db;
 
 //TODO: Makesure only admins can access these pages!
 

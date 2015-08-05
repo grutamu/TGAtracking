@@ -1,0 +1,30 @@
+<script type="text/javascript">
+              var CallEmAllWidgetSettings = {
+                             site: 'thegreatacademy.org',
+                             key: 'AE709A93C5EE9961BC85918DAC2F2440',
+                             btnColor: '#B02B2C',
+                             txtColor: 'white',
+                             buttonPos: 'left',
+                             keywords: 'GREAT',
+                             showF: '0',
+                             showL: '0',
+                             showWC: '0',
+                             WCtext: ''
+                             };
+              (function () {
+                             function loadCallEmAll() {
+                             var s = document.createElement('script');
+                             s.type = 'text/javascript';
+                             s.async = true;
+                             s.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'cdn.call-em-all.com/widget/widget.js';
+                             var x = document.getElementsByTagName('script')[0];
+                             x.parentNode.insertBefore(s, x);
+                             }
+                             if (window.attachEvent){
+                                           window.attachEvent('onload', loadCallEmAll);
+                             }
+                             else{
+                                           window.addEventListener('load', loadCallEmAll, false);
+                             }
+              })();
+</script>

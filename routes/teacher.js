@@ -1,7 +1,7 @@
 var express = require('express');
-var Account = require('../models/account');
+var Account;
 var TeacherRouter = express.Router();
-var db = require('../models/db');
+var db;
 
 TeacherRouter.get('/', function(req, res) {
 	if(!req.user){
