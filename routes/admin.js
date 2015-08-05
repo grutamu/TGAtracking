@@ -1,35 +1,34 @@
 var express = require('express');
-var Account;
 var AdminRouter = express.Router();
-var db;
+var bcrypt = require('bcrypt-nodejs');
 
-//TODO: Makesure only admins can access these pages!
+var mysql = require('mysql');
+var dbconfig = require('../models/db');
+var connection = mysql.createConnection(dbconfig.connection);
 
-AdminRouter.get('/', function(req, res) {
-	if(!req.user){
-        res.redirect('/');
-    }
-    
+connection.query('USE ' + dbconfig.database);
+
+AdminRouter.get('/', isLoggedInAndAdmin, function(req, res) {
     res.render('admin/admin', { user : req.user });
 });
 
 
-AdminRouter.get('/users', function(req, res) {
-	if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/users', isLoggedInAndAdmin, function(req, res) {
+    //TODO: only list Active Users
 
-    Account
-    .find({})
-    .exec(function(err, response){
+    connection.query("SELECT username, firstname, lastname, usertype FROM users WHERE user_is_active=1", function(err, rows){
 
-        userQuery = response;
+        if(err)
+            console.log("error" + err);
 
-        res.render('admin/users', { user : req.user, userQuery: userQuery });
-    });
+        console.log(rows)
+
+        res.render('admin/users', { user : req.user, userQuery: rows });
+    })
+
 });
 
-AdminRouter.post('/users', function(req, res) {
+AdminRouter.post('/users', isLoggedInAndAdmin, function(req, res) {
 
     var userIDs = Object.keys(req.body);
 
@@ -38,47 +37,42 @@ AdminRouter.post('/users', function(req, res) {
     for(var i =0; i < userIDs.length; i++){
 
         switch(req.body.SubmitButtonSelector){
-            case "delete":
-                Account.remove({userid: userIDs[i]}, function(err, success){ 
-                    console.log(err)
-                });
-                break;
-            case "edit":
-                res.redirect('/admin/users/edit?userid=' + userIDs[i]);
+            case "archive":
+                //TODO: Add archiving abailities
                 break;
         }
     }
     res.redirect('/admin/users');
 });
 
-AdminRouter.get('/users/edit', function(req, res) {
-	if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/users/edit',isLoggedInAndAdmin, function(req, res) {
 
     var userData;
-    var schoolData;
-
-    Account
-    .findOne({userid : req.query.userid})
-    .populate("school")
-    .exec(function(err, response) {
-
-        userData = response; 
-
-        db.schools
-        .find({})
-        .exec( function(err, Schools){
-            schoolData = Schools;
+    console.log(req.query.username);
 
 
-            res.render('admin/users_edit', {user : req.user, userData : userData, schools : schoolData });
-        });
-    });
+    connection.query("SELECT * FROM users WHERE username=?", [req.query.username], function(err, rows){
+        
+        if(err){
+            console.log(err);
+        }
+        
+        userData = rows[0];
+
+        console.log(userData);
+
+        //TODO: Add in a query to list all schools on the page
+
+        res.render('admin/users_edit', {user : req.user, userData : userData, schools : {} });
+    })
+
 });
 
-AdminRouter.post('/users/edit', function(req, res) {
-	var updateInfo = {
+AdminRouter.post('/users/edit', isLoggedInAndAdmin, function(req, res) {
+	
+    //TODO: clean all input.
+    var updateInfo = {
+        username : req.body.username,
 		firstname : req.body.firstname,
 		lastname : req.body.lastname,
 		email : req.body.email,
@@ -87,55 +81,74 @@ AdminRouter.post('/users/edit', function(req, res) {
         school : req.body.school
 	};
 
+    //TODO: Add in school and districtID when implemented
+    var queryString = "UPDATE users SET firstname = ?, lastname = ?, email = ?, stateid = ? WHERE username = ?"
 
-    console.log(req.body);
-	Account
-    .findOneAndUpdate({userid : req.body.userid}, updateInfo)
-    .exec(function(err, numberAffected, raw){
-        if(err) console.log(err);
-		res.redirect('/admin/users');
-	});
-});
-
-AdminRouter.get('/users/new', function(req, res) {
-    if(!req.user){
-        res.redirect('/');
-    }
-
-    var schoolData;
-
-    db.schools
-    .find({})
-    .exec( function(err, Schools){
-        schoolData = Schools;
-        
-        res.render('admin/users_new', { user : req.user, schools : schoolData });
-    });
-    
-});
-
-AdminRouter.post('/users/new', function(req, res) {
-
-    console.log(req.body);
-
-    Account.register(new Account({ 
-        username : req.body.username, 
-        firstname : req.body.firstname,
-        lastname : req.body.lastname,
-        email : req.body.email,
-        usertype : req.body.usertype,
-        stateid : req.body.stateid,
-        school : req.body.school
-        }), req.body.password, function(err, account) {
-
+    connection.query(queryString, [updateInfo.firstname, updateInfo.lastname, updateInfo.email, updateInfo.stateid, updateInfo.username], function(err){
+        if(err){
+            console.log(err)
+        }
         res.redirect('/admin/users');
     });
 });
 
-AdminRouter.get('/district', function(req, res){
-    if(!req.user){
-        res.redirect('/');
+AdminRouter.get('/users/new', isLoggedInAndAdmin, function(req, res) {
+
+    //TODO: Add in School Quering when implemented
+    res.render('admin/users_new', { user : req.user, schools : {} });
+  
+});
+
+AdminRouter.post('/users/new', isLoggedInAndAdmin, function(req, res) {
+
+    console.log(req.body)
+
+
+    var newUserInfo = { 
+        username : req.body.username, 
+        password : bcrypt.hashSync(req.body.password, null, null),
+        firstname : req.body.firstname,
+        lastname : req.body.lastname,
+        email : req.body.email,
+        usertype : req.body.usertype || '',
+        stateid : req.body.stateid,
+        schoolid : ''
     }
+
+    //TODO: Make this a function? or even more put this in the db.js and only make DB calls from there.
+    connection.query("SELECT * FROM users WHERE username = ?",[newUserInfo.username], function(err, rows) {
+        if (err)
+            console.log(err);
+        if (rows.length) {
+            //TODO: Flash something saying "ERR USERNAME TAKEN"
+            console.log("username Taken!")
+            console.log(err)
+        } else {
+            console.log("is in else")
+            var queryString = "INSERT INTO users ( username, password, firstname, lastname, email, usertype, stateid, schoolid ) values ( ?, ?, ?, ?, ?, ?, ?, ? )"
+
+            connection.query(queryString, [
+                    newUserInfo.username,
+                    newUserInfo.password,
+                    newUserInfo.firstname,
+                    newUserInfo.lastname,
+                    newUserInfo.email,
+                    newUserInfo.usertype,
+                    newUserInfo.stateid,
+                    newUserInfo.schoolid
+                ], function(err){
+                    console.log("is in last query")
+                    if(err){
+                        console.log(err)
+                    }
+            });
+        }   
+    });
+    
+    res.redirect('/admin/users');
+});
+
+AdminRouter.get('/district',isLoggedInAndAdmin, function(req, res){
 
     db.districts
     .find({}) 
@@ -147,7 +160,7 @@ AdminRouter.get('/district', function(req, res){
     
 });
 
-AdminRouter.post('/district', function(req, res) {
+AdminRouter.post('/district', isLoggedInAndAdmin, function(req, res) {
 
     var distIDs = Object.keys(req.body);
 
@@ -172,14 +185,12 @@ AdminRouter.post('/district', function(req, res) {
     res.redirect('/admin/district');
 });
 
-AdminRouter.get('/district/new', function(req, res){
-    if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/district/new',isLoggedInAndAdmin, function(req, res){
+
     res.render('admin/district_new', { user : req.user });
 });
 
-AdminRouter.post('/district/new', function(req, res) {
+AdminRouter.post('/district/new', isLoggedInAndAdmin, function(req, res) {
     
 
     var isactive;
@@ -204,10 +215,7 @@ AdminRouter.post('/district/new', function(req, res) {
     });
 });
 
-AdminRouter.get('/district/edit', function(req, res) {
-    if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/district/edit',isLoggedInAndAdmin, function(req, res) {
 
     var districtData;
 
@@ -221,7 +229,7 @@ AdminRouter.get('/district/edit', function(req, res) {
     })
 });
 
-AdminRouter.post('/district/edit', function(req, res) {
+AdminRouter.post('/district/edit', isLoggedInAndAdmin, function(req, res) {
 
     var isactive;
     if(req.body.active == "active")
@@ -248,10 +256,8 @@ AdminRouter.post('/district/edit', function(req, res) {
 
 
 //school
-AdminRouter.get('/school', function(req, res){
-    if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/school', isLoggedInAndAdmin, function(req, res){
+
     var SchoolResponse;
 
     db.schools
@@ -263,7 +269,7 @@ AdminRouter.get('/school', function(req, res){
     });
 });
 
-AdminRouter.post('/school', function(req, res) {
+AdminRouter.post('/school', isLoggedInAndAdmin, function(req, res) {
 
     var schoolIDs = Object.keys(req.body);
 
@@ -293,10 +299,7 @@ AdminRouter.post('/school', function(req, res) {
     res.redirect('/admin/school');
 });
 
-AdminRouter.get('/school/new', function(req, res){
-    if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/school/new', isLoggedInAndAdmin, function(req, res){
 
     db.districts
     .find({}) 
@@ -309,7 +312,7 @@ AdminRouter.get('/school/new', function(req, res){
 
 });
 
-AdminRouter.post('/school/new', function(req, res) {
+AdminRouter.post('/school/new', isLoggedInAndAdmin, function(req, res) {
     console.log(req.body);
 
     var isactive;
@@ -352,11 +355,7 @@ AdminRouter.post('/school/new', function(req, res) {
         
 });
 
-AdminRouter.get('/school/edit', function(req, res) {
-    if(!req.user){
-        res.redirect('/');
-    }
-
+AdminRouter.get('/school/edit', isLoggedInAndAdmin, function(req, res) {
     var schoolData;
     var districtData;
 
@@ -380,7 +379,7 @@ AdminRouter.get('/school/edit', function(req, res) {
         
 });
 
-AdminRouter.post('/school/edit', function(req, res) {
+AdminRouter.post('/school/edit', isLoggedInAndAdmin, function(req, res) {
     //console.log(req.body);
 
     var isactive;
@@ -410,6 +409,19 @@ AdminRouter.post('/school/edit', function(req, res) {
         res.redirect('/admin/school');
     });
 });
+
+
+// route middleware to make sure
+function isLoggedInAndAdmin(req, res, next) {
+
+    // if user is authenticated in the session, carry on
+    if (req.isAuthenticated() && req.user.usertype == "admin")
+        return next();
+
+    // if they aren't redirect them to the home page
+    res.redirect('/home');
+}
+
 
 
 module.exports = AdminRouter;

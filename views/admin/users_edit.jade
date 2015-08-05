@@ -13,9 +13,6 @@ block sysmain
 			legend Editing User #{userData.firstname} #{userData.lastname}
 			form(role='form', action="/admin/users/edit",method="post", id="form_id")
 				.row
-					label(align="right") System ID : 
-					input(type='text', name="userid", value='#{userData.userid}', readonly)
-				.row
 					label(align="right") Username : 
 					input(type='text', name="username", value='#{userData.username}', readonly)
 				.row

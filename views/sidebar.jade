@@ -3,54 +3,53 @@ block sidebar
 	ul.sys_nav
 		li.inactive(id='homesidebar')
 			a(href="/home") Dashboard
-	for types in user.usertype
-		if(types == "admin")
-			ul.sys_nav
-				li.inactive(id='adminsidebar')
-					span Site Settings
-					ul
-						li.inactive
-							a(href="/admin") Admin Page
-						li.inactive
-							a(href="/admin/users") Manage Users
-						li.inactive
-							a(href="/admin/district") Manage Districts
-						li.inactive
-							a(href="/admin/school") Manage Schools
-		if(types == "districtadmin")
-			ul.sys_nav
-				li.inactive(id='distadminsidebar')
-					span District Administrator
-					ul
-						li.inactive
-							a(href="/distadmin") District Admin Page
-						li.inactive
-							a(href="/distadmin/course") Manage Courses	
-						li.inactive
-							a(href="/distadmin/users") Manage Users
-						li.inactive
-							a(href="/distadmin/school") Manage Schools
-		if(types == "caseloadmanager")
-			ul.sys_nav
-				li.inactive(id='caseloadmanagersidebar')
-					span Caseload Manager
-					ul
-						li.inactive
-							a(href="/home") Caseload Manager Page
-		if(types == "teacher")
-			ul.sys_nav
-				li.inactive(id='teachersidebar')
-					span Teacher
-					ul
-						li.inactive
-							a(href="/teacher") Teacher Page
-						li.inactive
-							a(href="/teacher/courses") Manage My Courses
-		if(types == "student")
-			ul.sys_nav
-				li.inactive(id='studentsidebar')
-					span Student
-					ul
-						li.inactive
-							a(href="/home") Student Page
+	if(user.usertype == "admin")
+		ul.sys_nav
+			li.inactive(id='adminsidebar')
+				span Site Settings
+				ul
+					li.inactive
+						a(href="/admin") Admin Page
+					li.inactive
+						a(href="/admin/users") Manage Users
+					li.inactive
+						a(href="/admin/district") Manage Districts
+					li.inactive
+						a(href="/admin/school") Manage Schools
+	if(user.usertype == "districtadmin")
+		ul.sys_nav
+			li.inactive(id='distadminsidebar')
+				span District Administrator
+				ul
+					li.inactive
+						a(href="/distadmin") District Admin Page
+					li.inactive
+						a(href="/distadmin/course") Manage Courses	
+					li.inactive
+						a(href="/distadmin/users") Manage Users
+					li.inactive
+						a(href="/distadmin/school") Manage Schools
+	if(user.usertype == "caseloadmanager")
+		ul.sys_nav
+			li.inactive(id='caseloadmanagersidebar')
+				span Caseload Manager
+				ul
+					li.inactive
+						a(href="/home") Caseload Manager Page
+	if(user.usertype == "teacher")
+		ul.sys_nav
+			li.inactive(id='teachersidebar')
+				span Teacher
+				ul
+					li.inactive
+						a(href="/teacher") Teacher Page
+					li.inactive
+						a(href="/teacher/courses") Manage My Courses
+	if(user.usertype == "student")
+		ul.sys_nav
+			li.inactive(id='studentsidebar')
+				span Student
+				ul
+					li.inactive
+						a(href="/home") Student Page
 

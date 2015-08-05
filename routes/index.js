@@ -2,7 +2,7 @@ var express = require('express');
 var passport = require('passport');
 var router = express.Router();
 var mysql = require('mysql');
-var dbconfig = require('./db');
+var dbconfig = require('../models/db');
 var connection = mysql.createConnection(dbconfig.connection);
 
 connection.query('USE ' + dbconfig.database);
@@ -22,7 +22,7 @@ router.post('/register', passport.authenticate('local-signup',  { failureRedirec
             console.log("auth failed?")
         }
         else{
-            var queryString = "UPDATE users SET fName = ?, lName = ?, email = ? WHERE username = ?"
+            var queryString = "UPDATE users SET firstname = ?, lastname = ?, email = ? WHERE username = ?"
             
             connection.query(queryString,[req.body.firstname, req.body.lastname, req.body.email, req.body.username], function(err){
                 if(err){
@@ -50,6 +50,7 @@ router.get('/home', function(req, res) {
     if(!req.user){
         res.redirect('/');
     }
+    console.log(req.user);
     res.render('home', { user : req.user });
 });
 
