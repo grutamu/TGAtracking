@@ -270,12 +270,12 @@ AdminRouter.post('/district/edit', isLoggedInAndAdmin, function(req, res) {
 
 //school
 AdminRouter.get('/school', isLoggedInAndAdmin, function(req, res){
-
-    connection.query("SELECT * FROM schools WHERE is_active = 1", function(err, rows){
+    var SchoolData
+    connection.query("SELECT * FROM schools JOIN districts ON schools.district_id = districts.district_id WHERE schools.is_active = 1", function(err, rows){
         if(err) console.log(err);
+        SchoolData = rows;
 
-        console.log(rows);
-        res.render('admin/school', { user : req.user , schools : rows});
+        res.render('admin/school', { user : req.user , schools : SchoolData});
 
     });
 });
@@ -325,6 +325,7 @@ AdminRouter.post('/school/new', isLoggedInAndAdmin, function(req, res) {
         school_city : req.body.school_city,
         school_state : req.body.school_state,
         school_zip : req.body.school_zip,
+        current_school_year : req.body.current_school_year,
         is_active : is_active
     }
 
@@ -337,7 +338,7 @@ AdminRouter.post('/school/new', isLoggedInAndAdmin, function(req, res) {
             console.log("school with that name exists!")
             console.log(err)
         } else {
-            var queryString = "INSERT INTO schools ( district_id, school_name, school_address, school_city, school_state, school_zip, is_active) values ( ?, ?, ?, ?, ?, ?, ? )"
+            var queryString = "INSERT INTO schools ( district_id, school_name, school_address, school_city, school_state, school_zip, current_school_year, is_active) values ( ?, ?, ?, ?, ?, ?, ?,? )"
 
             connection.query(queryString, [
                     newSchoolInfo.district_id,
@@ -346,6 +347,7 @@ AdminRouter.post('/school/new', isLoggedInAndAdmin, function(req, res) {
                     newSchoolInfo.school_city,
                     newSchoolInfo.school_state,
                     newSchoolInfo.school_zip,
+                    newSchoolInfo.current_school_year,
                     newSchoolInfo.is_active
                 ], function(err){
                     if(err){
@@ -361,53 +363,49 @@ AdminRouter.get('/school/edit', isLoggedInAndAdmin, function(req, res) {
     var schoolData;
     var districtData;
 
-    db.districts
-    .find({})
-    .exec(function (err, response) {
 
-        districtData = response;
+    connection.query("SELECT * FROM districts", function(err, rows){
 
-        db.schools
-        .findOne(req.query)
-        .populate("district")
-        .exec(function (err, response) {
-            if (err) return handleError(err);
-            schoolData = response; 
-            console.log(schoolData);
+        districtData = rows
+
+        connection.query("SELECT * FROM schools JOIN districts ON schools.district_id = districts.district_id WHERE school_id = ?", [req.query.school_id], function(err, rows){
+
+            schoolData = rows[0];
+            console.log(schoolData)
+
             res.render('admin/school_edit', { user : req.user, data : schoolData, districts: districtData});
-        })
-
-    })
-        
+        });
+    });
 });
 
 AdminRouter.post('/school/edit', isLoggedInAndAdmin, function(req, res) {
-    //console.log(req.body);
+    console.log(req.body);
 
-    var isactive;
-
-    if(req.body.active == "active")
-        isactive = true
-    if(req.body.active == "inactive")
-        isactive = false
-
-
-    var updateInfo = {
-        district: req.body.districtid,
-        school_name: req.body.name,
-        school_address: req.body.address,
-        school_city: req.body.city,
-        school_state: req.body.state,
-        school_zip: req.body.zip,
-        current_school_year: req.body.schoolyear,
-        school_is_active: isactive,
+    var is_active;
+    if(req.body.is_active == "active"){
+        is_active = 1;
+    }
+    else{
+        is_active = 0;
     }
 
-    db.schools
-    .findOneAndUpdate({school_id : req.body.schooid}, updateInfo)
-    .exec(function(err, numberAffected, raw){
-        if (err) console.log(err);
-        console.log("Updated :" + numberAffected, raw);
+    var SchoolInfo = { 
+        school_id : req.body.school_id,
+        district_id : req.body.district_id, 
+        school_name : req.body.school_name,
+        school_address : req.body.school_address,
+        school_city : req.body.school_city,
+        school_state : req.body.school_state,
+        school_zip : req.body.school_zip,
+        current_school_year : req.body.current_school_year,
+        is_active : is_active
+    }
+    var queryString = "UPDATE schools SET district_id = ? , school_name = ?, school_address = ?, school_city = ?, school_state = ?, school_zip = ?, current_school_year = ?, is_active = ? WHERE school_id = ?"
+
+    connection.query(queryString, [ SchoolInfo.district_id, SchoolInfo.school_name, SchoolInfo.school_address, SchoolInfo.school_city, SchoolInfo.school_state, SchoolInfo.school_zip, SchoolInfo.current_school_year, SchoolInfo.is_active, SchoolInfo.school_id  ], function(err){
+
+        if(err) console.log(err);
+
         res.redirect('/admin/school');
     });
 });
