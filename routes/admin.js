@@ -1,5 +1,8 @@
 var express = require('express');
 var AdminRouter = express.Router();
+var users = require('../models/users');
+
+
 var bcrypt = require('bcrypt-nodejs');
 
 var mysql = require('mysql');
@@ -14,22 +17,16 @@ AdminRouter.get('/', isLoggedInAndAdmin, function(req, res) {
 
 
 AdminRouter.get('/users', isLoggedInAndAdmin, function(req, res) {
-    //TODO: only list Active Users
 
-    connection.query("SELECT username, firstname, lastname, usertype FROM users WHERE user_is_active=1", function(err, rows){
+    users.SelectActiveUsers(function(err, UsersData){
+        if(err) console.log(err);
 
-        if(err)
-            console.log("error" + err);
-
-        console.log(rows)
-
-        res.render('admin/users', { user : req.user, userQuery: rows });
-    })
-
+        res.render('admin/users', { user : req.user, userQuery: UsersData });
+    });
 });
 
 AdminRouter.post('/users', isLoggedInAndAdmin, function(req, res) {
-
+    console.log(req.body)
     var userIDs = Object.keys(req.body);
 
     userIDs.splice(userIDs.indexOf("SubmitButtonSelector"), 1 );
@@ -38,7 +35,9 @@ AdminRouter.post('/users', isLoggedInAndAdmin, function(req, res) {
 
         switch(req.body.SubmitButtonSelector){
             case "archive":
-                //TODO: Add archiving abailities
+                users.ToggleActiveUserByID(userIDs[i], function(err){
+                    if(err) console.log(err);
+                });
                 break;
         }
     }
@@ -47,44 +46,16 @@ AdminRouter.post('/users', isLoggedInAndAdmin, function(req, res) {
 
 AdminRouter.get('/users/edit',isLoggedInAndAdmin, function(req, res) {
 
-    var userData;
-    console.log(req.query.username);
-
-
-    connection.query("SELECT * FROM users WHERE username=?", [req.query.username], function(err, rows){
-        
-        if(err){
-            console.log(err);
-        }
-        
-        userData = rows[0];
-
-        console.log(userData);
-
-        //TODO: Add in a query to list all schools on the page
+    users.SelectUserByID(req.query.id, function(err, userData){
+        //TODO list all Schools as well.
 
         res.render('admin/users_edit', {user : req.user, userData : userData, schools : {} });
-    })
-
+    });
 });
 
 AdminRouter.post('/users/edit', isLoggedInAndAdmin, function(req, res) {
 	
-    //TODO: clean all input.
-    var updateInfo = {
-        username : req.body.username,
-		firstname : req.body.firstname,
-		lastname : req.body.lastname,
-		email : req.body.email,
-		usertype : req.body.usertype,
-        stateid : req.body.stateid,
-        school : req.body.school
-	};
-
-    //TODO: Add in school and districtID when implemented
-    var queryString = "UPDATE users SET firstname = ?, lastname = ?, email = ?, stateid = ? WHERE username = ?"
-
-    connection.query(queryString, [updateInfo.firstname, updateInfo.lastname, updateInfo.email, updateInfo.stateid, updateInfo.username], function(err){
+    users.UpdateUser(req.body, function(err){
         if(err){
             console.log(err)
         }
@@ -101,49 +72,14 @@ AdminRouter.get('/users/new', isLoggedInAndAdmin, function(req, res) {
 
 AdminRouter.post('/users/new', isLoggedInAndAdmin, function(req, res) {
 
-    console.log(req.body)
-
-
-    var newUserInfo = { 
-        username : req.body.username, 
-        password : bcrypt.hashSync(req.body.password, null, null),
-        firstname : req.body.firstname,
-        lastname : req.body.lastname,
-        email : req.body.email,
-        usertype : req.body.usertype || '',
-        stateid : req.body.stateid,
-        schoolid : ''
-    }
-
-    //TODO: Make this a function? or even more put this in the db.js and only make DB calls from there.
-    connection.query("SELECT * FROM users WHERE username = ?",[newUserInfo.username], function(err, rows) {
-        if (err)
-            console.log(err);
-        if (rows.length) {
-            //TODO: Flash something saying "ERR USERNAME TAKEN"
-            console.log("username Taken!")
+    users.CreateUser(req.body, function(err){
+        if(err){
             console.log(err)
-        } else {
-            var queryString = "INSERT INTO users ( username, password, firstname, lastname, email, usertype, stateid, schoolid ) values ( ?, ?, ?, ?, ?, ?, ?, ? )"
-
-            connection.query(queryString, [
-                    newUserInfo.username,
-                    newUserInfo.password,
-                    newUserInfo.firstname,
-                    newUserInfo.lastname,
-                    newUserInfo.email,
-                    newUserInfo.usertype,
-                    newUserInfo.stateid,
-                    newUserInfo.schoolid
-                ], function(err){
-                    if(err){
-                        console.log(err)
-                    }
-            });
-        }   
-    });
+        }
+        res.redirect('/admin/users');
+    })
     
-    res.redirect('/admin/users');
+    
 });
 
 AdminRouter.get('/district',isLoggedInAndAdmin, function(req, res){
@@ -161,9 +97,6 @@ AdminRouter.get('/district',isLoggedInAndAdmin, function(req, res){
 AdminRouter.post('/district', isLoggedInAndAdmin, function(req, res) {
 
     var distIDs = Object.keys(req.body);
-
-
-
     distIDs.splice(distIDs.indexOf("SubmitButtonSelector"), 1 );
 
     for(var i =0; i < distIDs.length; i++){
@@ -413,9 +346,9 @@ AdminRouter.post('/school/edit', isLoggedInAndAdmin, function(req, res) {
 
 // route middleware to make sure
 function isLoggedInAndAdmin(req, res, next) {
-
+    
     // if user is authenticated in the session, carry on
-    if (req.isAuthenticated() && req.user.usertype == "admin")
+    if (req.isAuthenticated() && req.user.usertype.indexOf('admin') != -1)
         return next();
 
     // if they aren't redirect them to the home page

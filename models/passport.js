@@ -7,6 +7,8 @@ var mysql = require('mysql');
 var bcrypt = require('bcrypt-nodejs');
 var dbconfig = require('./db');
 var connection = mysql.createConnection(dbconfig.connection);
+var flash = require('connect-flash');
+
 
 connection.query('USE ' + dbconfig.database);
 
@@ -27,8 +29,16 @@ module.exports = function(passport) {
 
     // used to deserialize the user
     passport.deserializeUser(function(id, done) {
+        var user = new Object;
         connection.query("SELECT * FROM users WHERE id = ? ",[id], function(err, rows){
-            done(err, rows[0]);
+            user = rows[0];
+            user.usertype = [];
+            connection.query("SELECT usertype FROM user_permissions WHERE user_id =? ORDER BY usertype",[id], function(err, rows){
+                for (i=0; i<rows.length; i++){
+                    user.usertype.push(rows[i].usertype)
+                }
+                done(err, user);
+            });             
         });
     });
 
@@ -79,6 +89,9 @@ module.exports = function(passport) {
     // =========================================================================
     // we are using named strategies since we have one for login and one for signup
     // by default, if there was no name, it would just be called 'local'
+
+
+    //TODO: IMPORTANT! Make sure only active users can login.
 
     passport.use(
         'local-login',

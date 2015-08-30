@@ -37,7 +37,9 @@ router.post('/register', passport.authenticate('local-signup',  { failureRedirec
 
 
 router.get('/login', function(req, res) {
-    res.render('login', { user : req.user });
+
+    //console.log(req.flash('loginMessage').length);
+    res.render('login', { message : req.flash('loginMessage')});
 });
 
 router.post('/login', passport.authenticate('local-login',  {

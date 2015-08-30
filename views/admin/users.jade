@@ -24,9 +24,9 @@ block sysmain
 				for users in userQuery		
 					tr
 						th
-							input(type='checkbox', name="#{users.username}")
+							input(type='checkbox', name="#{users.id}")
 						td
-							a(href="/admin/users/edit?username=#{users.username}")  #{users.firstname} #{users.middlename} #{users.lastname}
+							a(href="/admin/users/edit?id=#{users.id}")  #{users.firstname} #{users.middlename} #{users.lastname}
 						td
 							|#{users.username} 
 						td
