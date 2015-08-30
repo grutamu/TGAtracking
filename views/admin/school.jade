@@ -27,14 +27,14 @@ block sysmain
 						|State
 					th
 						|Zip
-				for school in schools		
+				for school in schools
 					tr
 						th
 							input.form-control(type='checkbox', name="#{school.school_id}")
 						td
 							a(href="/admin/school/edit?school_id=#{school.school_id}")  #{school.school_name} 
 						td
-							|#{school.district.district_name} 
+							|#{school.district_name} 
 						td
 							|#{school.school_address} 
 						td
@@ -45,6 +45,5 @@ block sysmain
 							|#{school.school_zip}
 		select(name="SubmitButtonSelector")
 			option(value = "none") -- --
-			option(value = "delete") Delete
-			option(value = "edit") Edit
+			option(value = "archive") Archive
 		button.btn.btn-default(type='submit') Submit	

@@ -6,6 +6,11 @@ block content
     h3 Log In
     fieldset
       form(role='form', action="/login",method="post", id="form_id")
+        -console.log(" " + message.length)
+        -if(message.length > 0)
+          ul.alerts
+            li.error #{message}
+
         #username
             input.form-control(type='text', name="username", placeholder='Enter Username')
         #password

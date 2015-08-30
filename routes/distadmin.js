@@ -1,7 +1,7 @@
 var express = require('express');
-var Account = require('../models/account');
+var Account;
 var DistAdminRouter = express.Router();
-var db = require('../models/db');
+var db;
 var async = require('async');
 
 DistAdminRouter.get('/', function(req, res) {

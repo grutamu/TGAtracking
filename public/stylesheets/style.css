@@ -9,17 +9,17 @@ h1 { background: green; padding: 20px; font-size: 1.2em; color: white;
 	margin: 0 0 20px 0; }
 #content { padding: 0 20px; }
 
-.alerts { padding: 0; margin-bottom: 20px; font-size: .9em; }
+.alerts { padding: 0; font-size: .9em; }
 	.alerts li { margin-bottom: 3px; list-style: none; }
 	.alerts li.success { background: #c8eebf; border:1px solid green; color:green; 
-		padding: 8px; }
+		padding: 8px; padding-top: 0px}
 	.alerts li.warning { background: #f6f6cf; border:1px solid orange; color:orange; 
 		padding: 8px; }
 	.alerts li.error { background: #fce9e9; border:1px solid red; color:red; 
 		padding: 8px; }
 
 label { float: left; width: 140px; display: block; padding-top:6px; }
-input { width: 220px; padding: 4px; float: left; }
+input { width: 228px; padding: 4px; float: left; }
 input.submit { width: 80px; }
 
 .required { color: red; font-size: .8em; margin: 20px 0; }

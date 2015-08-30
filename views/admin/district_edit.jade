@@ -4,22 +4,22 @@ block sysmain
 		window.onload = function(){
 			document.getElementById("adminsidebar").className = "active";
 		}
-	form(role='form', action="/admin/district/edit",method="post", style='max-width: 300px;')
+	form(id="form_id", role='form', action="/admin/district/edit",method="post", style='max-width: 300px;')
 		.form-group
-			input.form-control(type='text', name="id", value='#{data.district_id}', readonly)
+			input.form-control(type='text', name="district_id", value='#{data.district_id}', readonly)
 		.form-group
-			input.form-control(type='text', name="name", value='#{data.district_name}')
+			input.form-control(type='text', name="district_name", value='#{data.district_name}', readonly)
 		.form-group
-			input.form-control(type='txt', name="address", value='#{data.district_address}')
+			input.form-control(type='txt', name="district_address", value='#{data.district_address}')
 		.form-group
-			input.form-control(type='text', name="city", value='#{data.district_city}')
+			input.form-control(type='text', name="district_city", value='#{data.district_city}')
 		.form-group
-			input.form-control(type='text', name="state", value='#{data.district_state}')
+			input.form-control(type='text', name="district_state", value='#{data.district_state}')
 		.form-group
-			input.form-control(type='text', name="zip", value='#{data.district_zip}')
+			input.form-control(type='text', name="district_zip", value='#{data.district_zip}')
 		.form-group
 			label Is Active:
-			select(form="form_id", name="active")
+			select(form="form_id", name="is_active")
 				option(value = "active") Active
 				option(value = "inactive") Inactive
 		button.btn.btn-default(type='submit') Submit

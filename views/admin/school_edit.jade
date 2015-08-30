@@ -7,41 +7,41 @@ block sysmain
 	//ToDo fix CSS 
 	form(role='form', action="/admin/school/edit",method="post", style='max-width: 300px;', id="form_id")
 		.row
-			label School ID
-			input.form-control(type='text', name="schooid", value='#{data.school_id}', readonly)
+			label System ID
+			input.form-control(type='text', name="school_id", value='#{data.school_id}', readonly)
 		.row
 			label District:
 			//ToDo: Make sure the School's currect district is highlighted
-			select(form="form_id", name="districtid")
+			select(form="form_id", name="district_id")
 				for district in districts
-					if district.district_id == data.district.district_id
-						option(value = '#{district._id}', selected) #{district.district_name}
-					if district.district_id != data.district.district_id
-						option(value = '#{district._id}') #{district.district_name}
+					if district.district_id == data.district_id
+						option(value = '#{district.district_id}', selected) #{district.district_name}
+					else
+						option(value = '#{district.district_id}') #{district.district_name}
 		.row
 			label School Name
-			input.form-control(type='text', name="name", value='#{data.school_name}')
+			input.form-control(type='text', name="school_name", value='#{data.school_name}')
 		.row
 			label School Address
-			input.form-control(type='txt', name="address", value='#{data.school_address}')
+			input.form-control(type='text', name="school_address", value='#{data.school_address}')
 		.row
 			label School City
-			input.form-control(type='text', name="city", value='#{data.school_city}')
+			input.form-control(type='text', name="school_city", value='#{data.school_city}')
 		.row
 			label School State
-			input.form-control(type='text', name="state", value='#{data.school_state}')
+			input.form-control(type='text', name="school_state", value='#{data.school_state}')
 		.row
 			label School Zipcode
-			input.form-control(type='text', name="zip", value='#{data.school_zip}')
+			input.form-control(type='text', name="school_zip", value='#{data.school_zip}')
 		.row
 			label School Year:
 			//ToDo: Make sure the School's currect year is highlighted
-			select(form="form_id", name="schoolyear")
-				option(value = "2014 - 2015") 2014 - 2015
-				option(value = "2015 - 2016") 2015 - 2016
+			select(form="form_id", name="current_school_year")
+				option(value = "1415") 2014 - 2015
+				option(value = "1516") 2015 - 2016
 		.row
 			label Is Active:
-			select(form="form_id",name="active")
+			select(form="form_id",name="is_active")
 				option(value = "active") Active
 				option(value = "inactive") Inactive
 		.submitrow

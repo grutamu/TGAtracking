@@ -8,27 +8,27 @@ block sysmain
 		form(role='form', id="form_id", action="/admin/school/new",method="post", style='max-width: 300px;')
 			.form-group
 				label District:
-				select(form="form_id", name="districtid")
+				select(form="form_id", name="district_id")
 					for district in districts
 						option(value = '#{district.district_id}') #{district.district_name}
 			.form-group
-				input.form-control(type='text', name="name", placeholder='School Name')
+				input.form-control(type='text', name="school_name", placeholder='School Name')
 			.form-group
-				input.form-control(type='text', name="address", placeholder='Address')
+				input.form-control(type='text', name="school_address", placeholder='Address')
 			.form-group
-				input.form-control(type='text', name="city", placeholder='City')
+				input.form-control(type='text', name="school_city", placeholder='City')
 			.form-group
-				input.form-control(type='text', name="state", placeholder='State')
+				input.form-control(type='text', name="school_state", placeholder='State')
 			.form-group
-				input.form-control(type='text', name="zip", placeholder='Zipcode')
+				input.form-control(type='text', name="school_zip", placeholder='Zipcode')
 			.form-group
 				label School Year:
-				select(form="form_id", name="schoolyear")
-					option(value = "2014 - 2015") 2014 - 2015
-					option(value = "2015 - 2016") 2015 - 2016
+				select(form="form_id", name="current_school_year")
+					option(value = "1415") 2014 - 2015
+					option(value = "1516") 2015 - 2016
 			.form-group
 				label Is Active:
-				select(form="form_id", name="active")
+				select(form="form_id", name="is_active")
 					option(value = "active") Active
 					option(value = "inactive") Inactive
 			button.btn.btn-default(type='submit') Submit

@@ -24,15 +24,14 @@ block sysmain
 				for users in userQuery		
 					tr
 						th
-							input(type='checkbox', name="#{users.userid}")
+							input(type='checkbox', name="#{users.id}")
 						td
-							a(href="/admin/users/edit?userid=#{users.userid}")  #{users.firstname} #{users.lastname}
+							a(href="/admin/users/edit?id=#{users.id}")  #{users.firstname} #{users.middlename} #{users.lastname}
 						td
 							|#{users.username} 
 						td
 							|#{users.usertype}
 		select(name="SubmitButtonSelector")
 			option(value = "none") -- --
-			option(value = "delete") Delete
-			option(value = "edit") Edit
+			option(value = "archive") Archive
 		button(type='submit') Submit

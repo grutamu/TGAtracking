@@ -1,36 +1,32 @@
 var express = require('express');
-var Account = require('../models/account');
 var AdminRouter = express.Router();
-var db = require('../models/db');
+var users = require('../models/users');
 
-//TODO: Makesure only admins can access these pages!
 
-AdminRouter.get('/', function(req, res) {
-	if(!req.user){
-        res.redirect('/');
-    }
-    
+var bcrypt = require('bcrypt-nodejs');
+
+var mysql = require('mysql');
+var dbconfig = require('../models/db');
+var connection = mysql.createConnection(dbconfig.connection);
+
+connection.query('USE ' + dbconfig.database);
+
+AdminRouter.get('/', isLoggedInAndAdmin, function(req, res) {
     res.render('admin/admin', { user : req.user });
 });
 
 
-AdminRouter.get('/users', function(req, res) {
-	if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/users', isLoggedInAndAdmin, function(req, res) {
 
-    Account
-    .find({})
-    .exec(function(err, response){
+    users.SelectActiveUsers(function(err, UsersData){
+        if(err) console.log(err);
 
-        userQuery = response;
-
-        res.render('admin/users', { user : req.user, userQuery: userQuery });
+        res.render('admin/users', { user : req.user, userQuery: UsersData });
     });
 });
 
-AdminRouter.post('/users', function(req, res) {
-
+AdminRouter.post('/users', isLoggedInAndAdmin, function(req, res) {
+    console.log(req.body)
     var userIDs = Object.keys(req.body);
 
     userIDs.splice(userIDs.indexOf("SubmitButtonSelector"), 1 );
@@ -38,232 +34,186 @@ AdminRouter.post('/users', function(req, res) {
     for(var i =0; i < userIDs.length; i++){
 
         switch(req.body.SubmitButtonSelector){
-            case "delete":
-                Account.remove({userid: userIDs[i]}, function(err, success){ 
-                    console.log(err)
+            case "archive":
+                users.ToggleActiveUserByID(userIDs[i], function(err){
+                    if(err) console.log(err);
                 });
-                break;
-            case "edit":
-                res.redirect('/admin/users/edit?userid=' + userIDs[i]);
                 break;
         }
     }
     res.redirect('/admin/users');
 });
 
-AdminRouter.get('/users/edit', function(req, res) {
-	if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/users/edit',isLoggedInAndAdmin, function(req, res) {
 
-    var userData;
-    var schoolData;
+    users.SelectUserByID(req.query.id, function(err, userData){
+        //TODO list all Schools as well.
 
-    Account
-    .findOne({userid : req.query.userid})
-    .populate("school")
-    .exec(function(err, response) {
-
-        userData = response; 
-
-        db.schools
-        .find({})
-        .exec( function(err, Schools){
-            schoolData = Schools;
-
-
-            res.render('admin/users_edit', {user : req.user, userData : userData, schools : schoolData });
-        });
+        res.render('admin/users_edit', {user : req.user, userData : userData, schools : {} });
     });
 });
 
-AdminRouter.post('/users/edit', function(req, res) {
-	var updateInfo = {
-		firstname : req.body.firstname,
-		lastname : req.body.lastname,
-		email : req.body.email,
-		usertype : req.body.usertype,
-        stateid : req.body.stateid,
-        school : req.body.school
-	};
-
-
-    console.log(req.body);
-	Account
-    .findOneAndUpdate({userid : req.body.userid}, updateInfo)
-    .exec(function(err, numberAffected, raw){
-        if(err) console.log(err);
-		res.redirect('/admin/users');
-	});
-});
-
-AdminRouter.get('/users/new', function(req, res) {
-    if(!req.user){
-        res.redirect('/');
-    }
-
-    var schoolData;
-
-    db.schools
-    .find({})
-    .exec( function(err, Schools){
-        schoolData = Schools;
-        
-        res.render('admin/users_new', { user : req.user, schools : schoolData });
-    });
-    
-});
-
-AdminRouter.post('/users/new', function(req, res) {
-
-    console.log(req.body);
-
-    Account.register(new Account({ 
-        username : req.body.username, 
-        firstname : req.body.firstname,
-        lastname : req.body.lastname,
-        email : req.body.email,
-        usertype : req.body.usertype,
-        stateid : req.body.stateid,
-        school : req.body.school
-        }), req.body.password, function(err, account) {
-
+AdminRouter.post('/users/edit', isLoggedInAndAdmin, function(req, res) {
+	
+    users.UpdateUser(req.body, function(err){
+        if(err){
+            console.log(err)
+        }
         res.redirect('/admin/users');
     });
 });
 
-AdminRouter.get('/district', function(req, res){
-    if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/users/new', isLoggedInAndAdmin, function(req, res) {
 
-    db.districts
-    .find({}) 
-    .exec( function (err, response) {
-        
-        res.render('admin/district', { user : req.user , districts : response});
+    //TODO: Add in School Quering when implemented
+    res.render('admin/users_new', { user : req.user, schools : {} });
+  
+});
+
+AdminRouter.post('/users/new', isLoggedInAndAdmin, function(req, res) {
+
+    users.CreateUser(req.body, function(err){
+        if(err){
+            console.log(err)
+        }
+        res.redirect('/admin/users');
     })
-
+    
     
 });
 
-AdminRouter.post('/district', function(req, res) {
+AdminRouter.get('/district',isLoggedInAndAdmin, function(req, res){
+
+
+    connection.query("SELECT * FROM districts WHERE is_active = 1", function(err, rows){
+        if(err){
+            console.log(err)
+        }
+
+        res.render('admin/district', { user : req.user , districts : rows});
+    })
+});
+
+AdminRouter.post('/district', isLoggedInAndAdmin, function(req, res) {
 
     var distIDs = Object.keys(req.body);
-
-
-
     distIDs.splice(distIDs.indexOf("SubmitButtonSelector"), 1 );
 
     for(var i =0; i < distIDs.length; i++){
 
         switch(req.body.SubmitButtonSelector){
 
-            case "delete":
-                db.districts.remove({district_id: distIDs[i]}, function(err, success){ 
-                    console.log(err, success)
-                });
-                break;
-            case "edit":
-                res.redirect('/admin/district/edit?district_id=' + distIDs[i]);
+            case "archive":
+                //Archive Logic here
                 break;
         }
     }
     res.redirect('/admin/district');
 });
 
-AdminRouter.get('/district/new', function(req, res){
-    if(!req.user){
-        res.redirect('/');
-    }
+AdminRouter.get('/district/new', isLoggedInAndAdmin, function(req, res){
     res.render('admin/district_new', { user : req.user });
 });
 
-AdminRouter.post('/district/new', function(req, res) {
-    
+AdminRouter.post('/district/new', isLoggedInAndAdmin, function(req, res) {
+    console.log(req.body)
 
-    var isactive;
+    var is_active;
+    if(req.body.is_active == "active")
+        is_active = 1
+    if(req.body.is_active == "inactive")
+        is_active = 0
 
-    if(req.body.active == "active")
-        isactive = true
-    if(req.body.active == "inactive")
-        isactive = false
+    var newDistrictInfo = { 
+        district_name : req.body.district_name, 
+        district_address : req.body.district_address,
+        district_city : req.body.district_city,
+        district_state : req.body.district_state,
+        district_zip : req.body.district_zip,
+        is_active : is_active
+    }
 
-    db.districts.create({
-        district_name: req.body.name,
-        district_address: req.body.address,
-        district_city: req.body.city,
-        district_state: req.body.state,
-        district_zip: req.body.zip,
-        is_active: isactive,
-    }, function(err) {
-        if (err) {
-            //return res.render('users_new', { account : account });
-        }
+    //TODO: Make this a function? or even more put this in the db.js and only make DB calls from there.
+    connection.query("SELECT * FROM districts WHERE district_name = ?",[newDistrictInfo.district_name], function(err, rows) {
+        if (err)
+            console.log(err);
+        if (rows.length) {
+            //TODO: Flash something saying "ERR USERNAME TAKEN"
+            console.log("district with that name exists!")
+            console.log(err)
+        } else {
+            var queryString = "INSERT INTO districts ( district_name, district_address, district_city, district_state, district_zip, is_active) values ( ?, ?, ?, ?, ?, ? )"
+
+            connection.query(queryString, [
+                    newDistrictInfo.district_name,
+                    newDistrictInfo.district_address,
+                    newDistrictInfo.district_city,
+                    newDistrictInfo.district_state,
+                    newDistrictInfo.district_zip,
+                    newDistrictInfo.is_active
+                ], function(err){
+                    if(err){
+                        console.log(err)
+                    }
+            });
+        }   
+    });
         res.redirect('/admin/district');
+});
+
+AdminRouter.get('/district/edit', isLoggedInAndAdmin, function(req, res) {
+    connection.query("SELECT * FROM districts WHERE district_id = ?", [req.query.district_id], function(err, rows){
+        if(err){
+            console.log(err);
+        }
+        res.render('admin/district_edit', { user : req.user, data : rows[0]});
     });
 });
 
-AdminRouter.get('/district/edit', function(req, res) {
-    if(!req.user){
-        res.redirect('/');
+AdminRouter.post('/district/edit', isLoggedInAndAdmin, function(req, res) {
+
+    var is_active;
+    if(req.body.is_active == "active")
+        is_active = 1
+    if(req.body.is_active == "inactive")
+        is_active = 0
+
+    var updateDistrictInfo = { 
+        district_id : req.body.district_id,
+        district_name : req.body.district_name, 
+        district_address : req.body.district_address,
+        district_city : req.body.district_city,
+        district_state : req.body.district_state,
+        district_zip : req.body.district_zip,
+        is_active : is_active
     }
 
-    var districtData;
+    var queryString = "UPDATE districts SET district_address = ?, district_city = ?, district_state = ?, district_zip = ?, is_active = ? WHERE district_id = ?"
+
+    connection.query(queryString, [ updateDistrictInfo.district_address, updateDistrictInfo.district_city, updateDistrictInfo.district_state, updateDistrictInfo.district_zip, updateDistrictInfo.is_active, updateDistrictInfo.district_id ], function(err){
+
+        if(err) console.log(err);
 
 
-
-    db.districts.find(req.query, function (err, response) {
-        if (err) return handleError(err);
-        districtData = response[0]; 
-        console.log(districtData);
-        res.render('admin/district_edit', { user : req.user, data : districtData});
-    })
-});
-
-AdminRouter.post('/district/edit', function(req, res) {
-
-    var isactive;
-    if(req.body.active == "active")
-        isactive = true
-    if(req.body.active == "inactive")
-        isactive = false
-
-
-    var updateInfo = {
-        district_name: req.body.name,
-        district_address: req.body.address,
-        district_city: req.body.city,
-        district_state: req.body.state,
-        district_zip: req.body.zip,
-        is_active: isactive,
-    }
-
-    db.districts
-    .findOneAndUpdate({district_id : req.body.id}, updateInfo)
-    .exec(function(err, numberAffected, raw){
         res.redirect('/admin/district');
+
     });
 });
 
 
 //school
-AdminRouter.get('/school', function(req, res){
-    if(!req.user){
-        res.redirect('/');
-    }
-    var SchoolResponse;
+AdminRouter.get('/school', isLoggedInAndAdmin, function(req, res){
+    var SchoolData
+    connection.query("SELECT * FROM schools JOIN districts ON schools.district_id = districts.district_id WHERE schools.is_active = 1", function(err, rows){
+        if(err) console.log(err);
+        SchoolData = rows;
 
-    db.schools
-    .find({}) 
-    .populate("district")
-    .exec(function (err, response) {
-        SchoolResponse = response;
-        res.render('admin/school', { user : req.user , schools : SchoolResponse});
+        res.render('admin/school', { user : req.user , schools : SchoolData});
+
     });
 });
 
-AdminRouter.post('/school', function(req, res) {
+AdminRouter.post('/school', isLoggedInAndAdmin, function(req, res) {
 
     var schoolIDs = Object.keys(req.body);
 
@@ -273,17 +223,8 @@ AdminRouter.post('/school', function(req, res) {
 
         switch(req.body.SubmitButtonSelector){
 
-            case "delete":
-                db.schools
-                .remove({school_id: schoolIDs[i]}) 
-                .exec(function(err, success){
-                    if (!err){
-                        console.log("Delete Successful!")
-                    }
-                });
-                break;
-            case "edit":
-                res.redirect('/admin/school/edit?school_id=' + schoolIDs[i]);
+            case "archive":
+                //archive logic
                 break;
         }
 
@@ -293,123 +234,127 @@ AdminRouter.post('/school', function(req, res) {
     res.redirect('/admin/school');
 });
 
-AdminRouter.get('/school/new', function(req, res){
-    if(!req.user){
-        res.redirect('/');
-    }
-
-    db.districts
-    .find({}) 
-    .exec(function(err, response){
-
-        res.render('admin/school_new', { user : req.user, districts : response});
-
+AdminRouter.get('/school/new', isLoggedInAndAdmin, function(req, res){
+    connection.query("SELECT * FROM districts WHERE is_active = 1", function(err, rows){
+        res.render('admin/school_new', { user : req.user, districts : rows});
     });
-
-
 });
 
-AdminRouter.post('/school/new', function(req, res) {
+AdminRouter.post('/school/new', isLoggedInAndAdmin, function(req, res) {
+
     console.log(req.body);
 
-    var isactive;
 
-    if(req.body.active == "active")
-        isactive = true
-    if(req.body.active == "inactive")
-        isactive = false
+    var is_active;
+    if(req.body.is_active == "active")
+        is_active = 1
+    if(req.body.is_active == "inactive")
+        is_active = 0
 
-    db.districts
-    .findOne({district_id: req.body.districtid})
-    .exec(function(err, District){
-
-        var NewSchool = new db.schools({
-            district: District._id,
-            school_name: req.body.name,
-            school_address: req.body.address,
-            school_city: req.body.city,
-            school_state: req.body.state,
-            school_zip: req.body.zip,
-            current_school_year: req.body.schoolyear,
-            school_is_active: isactive
-        });
-
-
-        NewSchool
-        .save(function(err){
-            if (err) {
-                console.log("Error: " + err )
-            }
-
-            
-
-            res.redirect('/admin/school');
-        });
-
-        
-
-    })
-        
-});
-
-AdminRouter.get('/school/edit', function(req, res) {
-    if(!req.user){
-        res.redirect('/');
+    var newSchoolInfo = { 
+        district_id : req.body.district_id, 
+        school_name : req.body.school_name,
+        school_address : req.body.school_address,
+        school_city : req.body.school_city,
+        school_state : req.body.school_state,
+        school_zip : req.body.school_zip,
+        current_school_year : req.body.current_school_year,
+        is_active : is_active
     }
 
+    //TODO: Make this a function? or even more put this in the db.js and only make DB calls from there.
+    connection.query("SELECT * FROM schools WHERE school_name = ?",[newSchoolInfo.school_name], function(err, rows) {
+        if (err)
+            console.log(err);
+        if (rows.length) {
+            //TODO: Flash something saying "ERR USERNAME TAKEN"
+            console.log("school with that name exists!")
+            console.log(err)
+        } else {
+            var queryString = "INSERT INTO schools ( district_id, school_name, school_address, school_city, school_state, school_zip, current_school_year, is_active) values ( ?, ?, ?, ?, ?, ?, ?,? )"
+
+            connection.query(queryString, [
+                    newSchoolInfo.district_id,
+                    newSchoolInfo.school_name,
+                    newSchoolInfo.school_address,
+                    newSchoolInfo.school_city,
+                    newSchoolInfo.school_state,
+                    newSchoolInfo.school_zip,
+                    newSchoolInfo.current_school_year,
+                    newSchoolInfo.is_active
+                ], function(err){
+                    if(err){
+                        console.log(err)
+                    }
+            });
+        }   
+    });
+            res.redirect('/admin/school');
+});
+
+AdminRouter.get('/school/edit', isLoggedInAndAdmin, function(req, res) {
     var schoolData;
     var districtData;
 
-    db.districts
-    .find({})
-    .exec(function (err, response) {
 
-        districtData = response;
+    connection.query("SELECT * FROM districts", function(err, rows){
 
-        db.schools
-        .findOne(req.query)
-        .populate("district")
-        .exec(function (err, response) {
-            if (err) return handleError(err);
-            schoolData = response; 
-            console.log(schoolData);
+        districtData = rows
+
+        connection.query("SELECT * FROM schools JOIN districts ON schools.district_id = districts.district_id WHERE school_id = ?", [req.query.school_id], function(err, rows){
+
+            schoolData = rows[0];
+            console.log(schoolData)
+
             res.render('admin/school_edit', { user : req.user, data : schoolData, districts: districtData});
-        })
-
-    })
-        
+        });
+    });
 });
 
-AdminRouter.post('/school/edit', function(req, res) {
-    //console.log(req.body);
+AdminRouter.post('/school/edit', isLoggedInAndAdmin, function(req, res) {
+    console.log(req.body);
 
-    var isactive;
-
-    if(req.body.active == "active")
-        isactive = true
-    if(req.body.active == "inactive")
-        isactive = false
-
-
-    var updateInfo = {
-        district: req.body.districtid,
-        school_name: req.body.name,
-        school_address: req.body.address,
-        school_city: req.body.city,
-        school_state: req.body.state,
-        school_zip: req.body.zip,
-        current_school_year: req.body.schoolyear,
-        school_is_active: isactive,
+    var is_active;
+    if(req.body.is_active == "active"){
+        is_active = 1;
+    }
+    else{
+        is_active = 0;
     }
 
-    db.schools
-    .findOneAndUpdate({school_id : req.body.schooid}, updateInfo)
-    .exec(function(err, numberAffected, raw){
-        if (err) console.log(err);
-        console.log("Updated :" + numberAffected, raw);
+    var SchoolInfo = { 
+        school_id : req.body.school_id,
+        district_id : req.body.district_id, 
+        school_name : req.body.school_name,
+        school_address : req.body.school_address,
+        school_city : req.body.school_city,
+        school_state : req.body.school_state,
+        school_zip : req.body.school_zip,
+        current_school_year : req.body.current_school_year,
+        is_active : is_active
+    }
+    var queryString = "UPDATE schools SET district_id = ? , school_name = ?, school_address = ?, school_city = ?, school_state = ?, school_zip = ?, current_school_year = ?, is_active = ? WHERE school_id = ?"
+
+    connection.query(queryString, [ SchoolInfo.district_id, SchoolInfo.school_name, SchoolInfo.school_address, SchoolInfo.school_city, SchoolInfo.school_state, SchoolInfo.school_zip, SchoolInfo.current_school_year, SchoolInfo.is_active, SchoolInfo.school_id  ], function(err){
+
+        if(err) console.log(err);
+
         res.redirect('/admin/school');
     });
 });
+
+
+// route middleware to make sure
+function isLoggedInAndAdmin(req, res, next) {
+    
+    // if user is authenticated in the session, carry on
+    if (req.isAuthenticated() && req.user.usertype.indexOf('admin') != -1)
+        return next();
+
+    // if they aren't redirect them to the home page
+    res.redirect('/home');
+}
+
 
 
 module.exports = AdminRouter;
